@@ -66,6 +66,7 @@ def process_toxins(toxin_ids, delay=1):
 def main():
 
     st.sidebar.image('images/Logo_BioScient_colorido_2.png', use_container_width=True)
+    st.sidebar.markdown(''':red-background[Toxin Information Fetcher é uma aplicação desenvolvida para facilitar a busca e recuperação de \n informações toxicológicas a partir de IDs específicos de toxinas. \n A interface intuitiva permite aos usuários inserir múltiplos IDs de toxinas.]\n ''')
 
     # Conteúdo principal
     st.title('TOXBASE - Toxin Information Fetcher')
