@@ -8,6 +8,7 @@ def fetch_toxin_xml(toxin_id):
     """
     Fetch XML data for a given toxin ID from the T3DB database.
     """
+
     base_url = f"http://www.t3db.ca/toxins/{toxin_id}.xml"
     try:
         response = requests.get(base_url)
@@ -66,14 +67,21 @@ def process_toxins(toxin_ids, delay=1):
 def main():
 
     st.sidebar.image('images/Logo_BioScient_colorido_2.png', use_container_width=True)
-    st.sidebar.markdown(''':red-background[Toxin Information Fetcher é uma aplicação desenvolvida para facilitar a busca e recuperação de \n informações toxicológicas a partir de IDs específicos de toxinas. \n A interface intuitiva permite aos usuários inserir múltiplos IDs de toxinas.]\n ''')
+    st.sidebar.markdown(''':red-background[Toxin Information Fetcher é uma aplicação desenvolvida para facilitar a busca e recuperação de \n informações toxicológicas a partir de IDs, CAS ou nomes específicos de toxinas. \n A interface intuitiva permite aos usuários inserir múltiplos IDs, CAS ou nomes de toxinas.]\n ''')
 
     # Conteúdo principal
     st.title('TOXBASE - Toxin Information Fetcher')
 
     # Campo de texto para entrada dos IDs de toxinas
-    toxin_input = st.text_area("Enter Toxin IDs (comma-separated):", "")
 
+    mode = st.radio(
+    "How you search the toxin?",
+    ["t3db_ID", "Name", "CAS"],
+    index=None,
+    horizontal=True)
+
+    toxin_input = st.text_area(f"Enter {mode} (comma-separated):", "")
+    
     if toxin_input:
         toxin_ids = [x.strip() for x in toxin_input.split(",")]
 
