@@ -8,7 +8,7 @@ import extractor_page
 
     # Criando o autenticador
 authenticator = stauth.Authenticate(
-        st.secrets['credentials'],
+        st.secrets['credentials']['usernames'],
         st.secrets['cookie']['name'],
         st.secrets['cookie']['key'],
         st.secrets['cookie']['expiry_days']
