@@ -106,7 +106,7 @@ def pubchem_extractor (cas_numbers):
     for cas_number in cas_numbers:
         try:
             # Inicializar o navegador
-            driver = webdriver.Chrome()
+            #driver = webdriver.Chrome()
             
             # Acessar a página do PubChem
             url = 'https://pubchem.ncbi.nlm.nih.gov/'
