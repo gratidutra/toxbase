@@ -1,4 +1,4 @@
-import chromedriver_autoinstaller
+#import chromedriver_autoinstaller
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
