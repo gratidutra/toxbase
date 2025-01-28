@@ -4,14 +4,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 import time
 import requests
 import xml.etree.ElementTree as ET
 import pandas as pd
 import streamlit as st
+import os, sys
+from selenium import webdriver
+from selenium.webdriver import FirefoxOptions
 
 def fetch_toxin_xml(toxin_id):
     """
@@ -82,13 +82,16 @@ def t3db_extractor(cas_numbers, delay=1):
     else:
         return pd.DataFrame()  # Return an em
 
-@st.cache_resource
-def get_driver():
-    return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+@st.experimental_singleton
+def installff():
+  os.system('sbase install geckodriver')
+  os.system('ln -s /home/appuser/venv/lib/python3.7/site-packages/seleniumbase/drivers/geckodriver /home/appuser/venv/bin/geckodriver')
 
-options = Options()
-options.add_argument('--disable-gpu')
-options.add_argument('--headless')
+_ = installff()
+opts = FirefoxOptions()
+opts.add_argument("--headless")
+browser = webdriver.Firefox(options=opts)
+
 
 def pubchem_extractor (cas_numbers):
 
