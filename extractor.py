@@ -91,7 +91,6 @@ opts = FirefoxOptions()
 opts.add_argument("--headless")
 driver = webdriver.Firefox(options=opts)
 
-
 def pubchem_extractor (cas_numbers):
 
     if isinstance(cas_numbers, str):
@@ -99,7 +98,7 @@ def pubchem_extractor (cas_numbers):
 
     # Instalar o ChromeDriver automaticamente
     #chromedriver_autoinstaller.install()
-    driver = get_driver()
+    #driver = get_driver()
 
     # Inicializar o DataFrame final
     all_data = pd.DataFrame()
