@@ -185,7 +185,6 @@ def pubchem_extractor(cas_numbers):
 
     return all_data
 
-
 def echa_extrator(cas_numbers):
 
     if isinstance(cas_numbers, str):
@@ -303,3 +302,5 @@ def echa_extrator(cas_numbers):
         finally:
             # Fechar o navegador
             driver.quit()
+
+    return all_data
