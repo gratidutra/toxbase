@@ -82,7 +82,6 @@ def t3db_extractor(cas_numbers, delay=1):
     else:
         return pd.DataFrame()  # Return an em
 
-@st.experimental_singleton
 def installff():
   os.system('sbase install geckodriver')
   os.system('ln -s /home/appuser/venv/lib/python3.7/site-packages/seleniumbase/drivers/geckodriver /home/appuser/venv/bin/geckodriver')
@@ -90,7 +89,7 @@ def installff():
 _ = installff()
 opts = FirefoxOptions()
 opts.add_argument("--headless")
-browser = webdriver.Firefox(options=opts)
+driver = webdriver.Firefox(options=opts)
 
 
 def pubchem_extractor (cas_numbers):
