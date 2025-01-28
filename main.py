@@ -1,6 +1,5 @@
 import toml
-import streamlit as st
-#from toml.loader import SafeLoader
+import streamlit as ster
 import streamlit_authenticator as stauth
 from streamlit_authenticator.utilities import LoginError 
 import extractor_page
