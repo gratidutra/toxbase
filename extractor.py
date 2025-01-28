@@ -82,16 +82,9 @@ def t3db_extractor(cas_numbers, delay=1):
         return pd.concat(all_toxins, ignore_index=True)
     else:
         return pd.DataFrame()  # Return an em
-    
-def pubchem_extractor (cas_numbers):
 
-    if isinstance(cas_numbers, str):
-        cas_numbers = [cas_numbers]
-
-    # Instalar o ChromeDriver automaticamente
-    #chromedriver_autoinstaller.install()
-    @st.cache_resource
-    def get_driver():
+@st.cache_resource
+def get_driver():
         return webdriver.Chrome(
             service=Service(
                 ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
@@ -99,10 +92,17 @@ def pubchem_extractor (cas_numbers):
             options=options,
         )
 
-    options = Options()
-    options.add_argument("--disable-gpu")
-    options.add_argument("--headless")
+options = Options()
+options.add_argument("--disable-gpu")
+options.add_argument("--headless")
 
+def pubchem_extractor (cas_numbers):
+
+    if isinstance(cas_numbers, str):
+        cas_numbers = [cas_numbers]
+
+    # Instalar o ChromeDriver automaticamente
+    #chromedriver_autoinstaller.install()
     driver = get_driver()
 
     # Inicializar o DataFrame final
