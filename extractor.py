@@ -193,7 +193,7 @@ def echa_extrator(cas_numbers):
 
     # Acessar a página do PubChem
     url = "https://echa.europa.eu/pt/information-on-chemicals"
-    driver.get(url)
+    #driver.get(url)
 
     for cas_number in cas_numbers:
         try:
@@ -205,6 +205,8 @@ def echa_extrator(cas_numbers):
                 options=firefoxOptions,
                 service=service,
             )
+
+            driver.get(url)
 
             # Configurar WebDriverWait
             wait = WebDriverWait(driver, 10)
