@@ -1,17 +1,17 @@
-import toml
+#import toml
 import streamlit as ster
 import streamlit_authenticator as stauth
 from streamlit_authenticator.utilities import LoginError 
 import extractor_page
 
-config = toml.load('config.toml')
+#config = toml.load('config.toml')
 
     # Criando o autenticador
 authenticator = stauth.Authenticate(
-        config['credentials'],
-        config['cookie']['name'],
-        config['cookie']['key'],
-        config['cookie']['expiry_days']
+        st.secrets['credentials'],
+        st.secrets['cookie']['name'],
+        st.secrets['cookie']['key'],
+        st.secrets['cookie']['expiry_days']
     )
 
 # Creating a login widget
