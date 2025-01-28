@@ -1,5 +1,6 @@
 #streamlit-authenticator==0.4.1
 #chromedriver-autoinstaller
 pandas
-seleniumbase
-#webdriver-manager==4.0.2
+#seleniumbase
+selenium
+webdriver-manager==4.0.2

@@ -10,8 +10,12 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 import streamlit as st
 import os, sys
-from selenium import webdriver
-from selenium.webdriver import FirefoxOptions
+
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.firefox import GeckoDriverManager
 
 def fetch_toxin_xml(toxin_id):
     """
@@ -82,15 +86,6 @@ def t3db_extractor(cas_numbers, delay=1):
     else:
         return pd.DataFrame()  # Return an em
 
-def installff():
-  os.system('sbase install geckodriver')
-  os.system('ln -s /home/appuser/venv/lib/python3.7/site-packages/seleniumbase/drivers/geckodriver /home/appuser/venv/bin/geckodriver')
-
-_ = installff()
-opts = FirefoxOptions()
-opts.add_argument("--headless")
-driver = webdriver.Firefox(options=opts)
-
 def pubchem_extractor (cas_numbers):
 
     if isinstance(cas_numbers, str):
@@ -107,6 +102,14 @@ def pubchem_extractor (cas_numbers):
         try:
             # Inicializar o navegador
             #driver = webdriver.Chrome()
+
+            firefoxOptions = Options()
+            firefoxOptions.add_argument("--headless")
+            service = Service(GeckoDriverManager().install())
+            driver = webdriver.Firefox(
+                options=firefoxOptions,
+                service=service,
+            )
             
             # Acessar a página do PubChem
             url = 'https://pubchem.ncbi.nlm.nih.gov/'
