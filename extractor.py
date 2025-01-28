@@ -82,7 +82,7 @@ def t3db_extractor(cas_numbers, delay=1):
     else:
         return pd.DataFrame()  # Return an em
 
-@st.experimental_singleton
+@st.experimental_memo
 def get_driver():
     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
