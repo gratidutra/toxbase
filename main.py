@@ -16,9 +16,9 @@ def main():
     # Campo de texto para entrada dos IDs de toxinas
 
     database_functions = {
-        #"T3DB": t3db_extractor,
+        # "T3DB": t3db_extractor,
         "PubChem": pubchem_extractor,
-        "ECHA": echa_extrator
+        "ECHA": echa_extrator,
     }
 
     # Entrada de IDs e seleção de bancos

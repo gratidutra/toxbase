@@ -190,9 +190,6 @@ def echa_extrator(cas_numbers):
         cas_numbers = [cas_numbers]
 
     all_data = pd.DataFrame()
-
-    # Acessar a página do PubChem
-    url = "https://echa.europa.eu/pt/information-on-chemicals"
     #driver.get(url)
 
     for cas_number in cas_numbers:
@@ -206,6 +203,7 @@ def echa_extrator(cas_numbers):
                 service=service,
             )
 
+            url = "https://echa.europa.eu/pt/information-on-chemicals"
             driver.get(url)
 
             # Configurar WebDriverWait
@@ -287,9 +285,9 @@ def echa_extrator(cas_numbers):
             consumer_user = driver.find_element(
                 By.XPATH, '//*[@id="aboutSubstanceParagraphWrapper"]/p[3]'
             ).text
-            article_services = driver.find_element(
-                By.XPATH, '//div[text()="Description"]/following-sibling::div'
-            ).text
+            #article_services = driver.find_element(
+            #    By.XPATH, '//div[text()="Description"]/following-sibling::div'
+            #).text
 
             # Criar um dicionário com os dados extraídos
             dict_data = {
@@ -300,7 +298,7 @@ def echa_extrator(cas_numbers):
                 "About": [about_1],
                 "About 2": [about_2],
                 "Consumer User": [consumer_user],
-                "article_services": [article_services],
+                #"article_services": [article_services],
             }
 
             # Criar um DataFrame e adicionar ao DataFrame final
