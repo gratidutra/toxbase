@@ -78,65 +78,71 @@ def t3db_extractor(cas_numbers, delay=1):
     else:
         return pd.DataFrame()  # Return an em
     
-def pubchem_extractor (cas_name):
+def pubchem_extractor (cas_numbers):
 
+    if isinstance(cas_numbers, str):
+        cas_numbers = [cas_numbers]
+
+    # Instalar o ChromeDriver automaticamente
     chromedriver_autoinstaller.install()
-    driver = webdriver.Chrome()
     
-    url = 'https://pubchem.ncbi.nlm.nih.gov/'
-    driver.get(url)
+    # Inicializar o DataFrame final
+    all_data = pd.DataFrame()
 
-    time.sleep(3)
-    search = driver.find_element(By.XPATH, '/html/body/div[1]/div/div/main/div[1]/div/div[2]/div/div[2]/form/div/div[1]/input')
-    search.send_keys(cas_name)
+    for cas_number in cas_numbers:
+        try:
+            # Inicializar o navegador
+            driver = webdriver.Chrome()
+            
+            # Acessar a página do PubChem
+            url = 'https://pubchem.ncbi.nlm.nih.gov/'
+            driver.get(url)
 
-    search.send_keys(Keys.RETURN)
+            time.sleep(3)
+            
+            # Inserir o número CAS na barra de pesquisa
+            search = driver.find_element(By.XPATH, '/html/body/div[1]/div/div/main/div[1]/div/div[2]/div/div[2]/form/div/div[1]/input')
+            search.send_keys(cas_number)
+            search.send_keys(Keys.RETURN)
 
+            # Aguardar até que o elemento clicável esteja disponível
+            WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div/div/main/div[2]/div[1]/div/div[2]/div/div[1]/div[2]/div[1]/a/span/span'))
+            ).click()
 
-    # Aguardar até que o elemento esteja visível e clicável
-    try:
-        # Substitua o tempo de espera conforme necessário (em segundos)
-        element = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div/div/main/div[2]/div[1]/div/div[2]/div/div[1]/div[2]/div[1]/a/span/span'))
-        )
-        # Clica no elemento
-        element.click()
-        print("Elemento clicado com sucesso!")
-    except Exception as e:
-        print(f"Erro ao localizar ou clicar no elemento: {e}")
+            # Esperar para carregar os detalhes
+            time.sleep(5)
 
-    # Extração de informações específicas
+            # Extração dos dados
+            cid = driver.find_element(By.XPATH, '//div[text()="PubChem CID"]/following-sibling::div').text
+            molecular_formula = driver.find_element(By.XPATH, '//div[text()="Molecular Formula"]/following-sibling::div').text
+            synonyms = driver.find_element(By.XPATH, '//div[text()="Synonyms"]/following-sibling::div').text
+            molecular_weight = driver.find_element(By.XPATH, '//div[text()="Molecular Weight"]/following-sibling::div').text
+            dates = driver.find_element(By.XPATH, '//div[text()="Dates"]/following-sibling::div').text
+            description = driver.find_element(By.XPATH, '//div[text()="Description"]/following-sibling::div').text
 
-    time.sleep(5)
-    
-    try:
-        cid = driver.find_element(By.XPATH, '//div[text()="PubChem CID"]/following-sibling::div').text
-        molecular_formula = driver.find_element(By.XPATH, '//div[text()="Molecular Formula"]/following-sibling::div').text
-        synonyms = driver.find_element(By.XPATH, '//div[text()="Synonyms"]/following-sibling::div').text
-        molecular_weight = driver.find_element(By.XPATH, '//div[text()="Molecular Weight"]/following-sibling::div').text
-        #parent_compounds = driver.find_element(By.XPATH, '//*[@id="Title-and-Summary"]/div/div/div/div[7]/div[2]/div/div/div').text
-        #component_compounds = driver.find_element(By.XPATH, '//*[@id="Title-and-Summary"]/div/div/div/div[8]/div[1]').text
-        dates = driver.find_element(By.XPATH, '//div[text()="Dates"]/following-sibling::div').text
-        description = driver.find_element(By.XPATH, '//div[text()="Description"]/following-sibling::div').text
-        #expanded_content = driver.find_element(By.XPATH, '//*[@id="Title-and-Summary"]/div/div/div/div[10]/div[2]/div/button').text
-    except Exception as e:
-        print(f"Erro ao localizar os elementos: {e}")
-    # Feche o navegador
-    driver.quit()
+            # Criar um dicionário com os dados extraídos
+            dict_data = {
+                "CAS Number": [cas_number],
+                "CID": [cid],
+                "Fórmula Molecular": [molecular_formula],
+                "Sinônimos": [synonyms],
+                "Peso Molecular": [molecular_weight],
+                "Datas": [dates],
+                "Descrição": [description]
+            }
 
-    dict_data = {
-        "CID": [cid],
-        "Fórmula Molecular": [molecular_formula],
-        "Sinônimos": [synonyms],
-        "Peso Molecular": [molecular_weight],
-        #"Componentes parentes": [parent_compounds],
-        "Datas": [dates],
-        "Descrição": [description]
-    }
+            # Criar um DataFrame e adicionar ao DataFrame final
+            data = pd.DataFrame(dict_data)
+            all_data = pd.concat([all_data, data], ignore_index=True)
 
-    # Criação de um DataFrame
-    data = pd.DataFrame(dict_data)
+        except Exception as e:
+            print(f"Erro ao processar o CAS Number {cas_number}: {e}")
+        finally:
+            # Fechar o navegador
+            driver.quit()
 
-    data = data.applymap(lambda x: str(x).replace('\\n', ' ').replace('\n', ' ') if isinstance(x, str) else x)
+    # Limpar o DataFrame final (remover caracteres indesejados)
+    #all_data = all_data.applymap(lambda x: str(x).replace('\\n', ' ').replace('\n', ' ') if isinstance(x, str) else x)
 
-    return data
+    return all_data
