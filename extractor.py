@@ -7,7 +7,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.core.os_manager import ChromeType
 import time
 import requests
 import xml.etree.ElementTree as ET
@@ -83,18 +82,13 @@ def t3db_extractor(cas_numbers, delay=1):
     else:
         return pd.DataFrame()  # Return an em
 
-@st.cache_resource
+@st.experimental_singleton
 def get_driver():
-        return webdriver.Chrome(
-            service=Service(
-                ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
-            ),
-            options=options,
-        )
+    return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 options = Options()
-options.add_argument("--disable-gpu")
-options.add_argument("--headless")
+options.add_argument('--disable-gpu')
+options.add_argument('--headless')
 
 def pubchem_extractor (cas_numbers):
 
