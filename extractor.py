@@ -14,14 +14,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.firefox import GeckoDriverManager
 
-firefoxOptions = Options()
-firefoxOptions.add_argument("--headless")
-service = Service(GeckoDriverManager().install())
-driver = webdriver.Firefox(
-    options=firefoxOptions,
-    service=service,
-)
-
 
 def fetch_toxin_xml(toxin_id):
     """
@@ -111,7 +103,13 @@ def pubchem_extractor(cas_numbers):
         try:
             # Inicializar o navegador
             # driver = webdriver.Chrome()
-
+            firefoxOptions = Options()
+            firefoxOptions.add_argument("--headless")
+            service = Service(GeckoDriverManager().install())
+            driver = webdriver.Firefox(
+                options=firefoxOptions,
+                service=service,
+            )
             # Acessar a página do PubChem
             url = "https://pubchem.ncbi.nlm.nih.gov/"
             driver.get(url)
@@ -185,6 +183,7 @@ def pubchem_extractor(cas_numbers):
 
     return all_data
 
+
 def echa_extrator(cas_numbers):
 
     if isinstance(cas_numbers, str):
@@ -198,6 +197,15 @@ def echa_extrator(cas_numbers):
 
     for cas_number in cas_numbers:
         try:
+
+            firefoxOptions = Options()
+            firefoxOptions.add_argument("--headless")
+            service = Service(GeckoDriverManager().install())
+            driver = webdriver.Firefox(
+                options=firefoxOptions,
+                service=service,
+            )
+
             # Configurar WebDriverWait
             wait = WebDriverWait(driver, 10)
             actions = ActionChains(driver)
