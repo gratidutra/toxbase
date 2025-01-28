@@ -4,10 +4,15 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.os_manager import ChromeType
 import time
 import requests
 import xml.etree.ElementTree as ET
 import pandas as pd
+import streamlit as st
 
 def fetch_toxin_xml(toxin_id):
     """
@@ -84,8 +89,22 @@ def pubchem_extractor (cas_numbers):
         cas_numbers = [cas_numbers]
 
     # Instalar o ChromeDriver automaticamente
-    chromedriver_autoinstaller.install()
-    
+    #chromedriver_autoinstaller.install()
+    @st.cache_resource
+    def get_driver():
+        return webdriver.Chrome(
+            service=Service(
+                ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
+            ),
+            options=options,
+        )
+
+    options = Options()
+    options.add_argument("--disable-gpu")
+    options.add_argument("--headless")
+
+    driver = get_driver()
+
     # Inicializar o DataFrame final
     all_data = pd.DataFrame()
 
