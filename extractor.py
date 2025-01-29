@@ -210,13 +210,13 @@ def echa_extractor(cas_numbers):
             cookie_button = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="cookie-consent-banner"]/div/div/div[2]/a[1]')))
             actions.move_to_element(cookie_button).click().perform()
             
-            time.sleep(2)
+            time.sleep(5)
             
             # Selecionar checkbox
             checkbox = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="_disssimplesearchhomepage_WAR_disssearchportlet_fm"]/div[2]/label/span')))
             actions.move_to_element(checkbox).click().perform()
             
-            time.sleep(2)
+            time.sleep(5)
             
             # Inserir o número CAS na barra de pesquisa
             search = driver.find_element(By.XPATH, '//*[@id="autocompleteKeywordInput"]')
