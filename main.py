@@ -18,7 +18,7 @@ def main():
     database_functions = {
         # "T3DB": t3db_extractor,
         "PubChem": pubchem_extractor,
-        "ECHA": echa_extrator,
+        "ECHA": echa_extractor,
     }
 
     # Entrada de IDs e seleção de bancos
