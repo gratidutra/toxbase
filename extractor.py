@@ -191,7 +191,7 @@ def echa_extractor(cas_numbers):
     #chromedriver_autoinstaller.install()
 
     for cas_number in cas_numbers:
-        driver = webdriver.Chrome()
+        #driver = webdriver.Chrome()
         firefoxOptions = Options()
         firefoxOptions.add_argument("--headless")
         service = Service(GeckoDriverManager().install())
