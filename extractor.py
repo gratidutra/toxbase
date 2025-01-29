@@ -1,4 +1,4 @@
-# import chromedriver_autoinstaller
+import chromedriver_autoinstaller
 import time
 import xml.etree.ElementTree as ET
 
@@ -8,11 +8,11 @@ from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.service import Service
+#from selenium.webdriver.firefox.options import Options
+#from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from webdriver_manager.firefox import GeckoDriverManager
+#from webdriver_manager.firefox import GeckoDriverManager
 
 
 def fetch_toxin_xml(toxin_id):
@@ -93,13 +93,13 @@ def pubchem_extractor(cas_numbers):
         cas_numbers = [cas_numbers]
 
     # Instalar o ChromeDriver automaticamente
-    # chromedriver_autoinstaller.install()
-    # driver = get_driver()
+    
+    pubchem_data = pd.DataFrame()
 
-    # Inicializar o DataFrame final
-    all_data = pd.DataFrame()
+    #chromedriver_autoinstaller.install()
 
     for cas_number in cas_numbers:
+        #driver = webdriver.Chrome()
         firefoxOptions = Options()
         firefoxOptions.add_argument("--headless")
         service = Service(GeckoDriverManager().install())
@@ -169,7 +169,7 @@ def pubchem_extractor(cas_numbers):
 
             # Criar um DataFrame e adicionar ao DataFrame final
             data = pd.DataFrame(dict_data)
-            all_data = pd.concat([all_data, data], ignore_index=True)
+            pubchem_data = pd.concat([pubchem_data, data], ignore_index=True)
 
         except Exception as e:
             print(f"Erro ao processar o CAS Number {cas_number}: {e}")
@@ -177,10 +177,7 @@ def pubchem_extractor(cas_numbers):
             # Fechar o navegador
             driver.quit()
 
-    # Limpar o DataFrame final (remover caracteres indesejados)
-    # all_data = all_data.applymap(lambda x: str(x).replace('\\n', ' ').replace('\n', ' ') if isinstance(x, str) else x)
-
-    return all_data
+    return pubchem_data
 
 
 def echa_extractor(cas_numbers):
@@ -189,9 +186,12 @@ def echa_extractor(cas_numbers):
         cas_numbers = [cas_numbers]
     
     # Instalar e configurar o driver automaticamente
-    all_data = pd.DataFrame()
+    echa_data = pd.DataFrame()
+
+    #chromedriver_autoinstaller.install()
 
     for cas_number in cas_numbers:
+        driver = webdriver.Chrome()
         firefoxOptions = Options()
         firefoxOptions.add_argument("--headless")
         service = Service(GeckoDriverManager().install())
@@ -253,7 +253,7 @@ def echa_extractor(cas_numbers):
             }
             
             data = pd.DataFrame(dict_data)
-            all_data = pd.concat([all_data, data], ignore_index=True)
+            echa_data = pd.concat([echa_data, data], ignore_index=True)
         
         except Exception as e:
             print(f"Erro ao processar o CAS Number {cas_number}: {e}")
@@ -261,5 +261,5 @@ def echa_extractor(cas_numbers):
             # Fechar o navegador
             driver.quit()
     
-    return all_data
+    return echa_data
 
