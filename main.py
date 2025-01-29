@@ -1,6 +1,6 @@
 import streamlit as st
 
-from extractor import pubchem_extractor, echa_extrator
+from extractor import pubchem_extractor, echa_extractor
 
 
 def main():
