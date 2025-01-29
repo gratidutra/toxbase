@@ -183,7 +183,7 @@ def pubchem_extractor(cas_numbers):
     return all_data
 
 
-def consulta_echa(cas_numbers):
+def echa_extractor(cas_numbers):
     # Certificar-se de que cas_numbers é uma lista
     if isinstance(cas_numbers, str):
         cas_numbers = [cas_numbers]
