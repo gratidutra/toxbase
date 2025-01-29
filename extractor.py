@@ -1,4 +1,4 @@
-import chromedriver_autoinstaller
+#import chromedriver_autoinstaller
 import time
 import xml.etree.ElementTree as ET
 
@@ -8,11 +8,11 @@ from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-#from selenium.webdriver.firefox.options import Options
-#from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-#from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
+from webdriver_manager.firefox import GeckoDriverManager
 
 
 def fetch_toxin_xml(toxin_id):
