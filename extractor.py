@@ -1,4 +1,4 @@
-#import chromedriver_autoinstaller
+import chromedriver_autoinstaller
 import time
 import xml.etree.ElementTree as ET
 
@@ -10,9 +10,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.service import Service
-from webdriver_manager.firefox import GeckoDriverManager
+#from selenium.webdriver.firefox.options import Options
+#from selenium.webdriver.firefox.service import Service
+#from webdriver_manager.firefox import GeckoDriverManager
 
 
 def fetch_toxin_xml(toxin_id):
@@ -92,20 +92,18 @@ def pubchem_extractor(cas_numbers):
     if isinstance(cas_numbers, str):
         cas_numbers = [cas_numbers]
 
-    # Instalar o ChromeDriver automaticamente
-    
     pubchem_data = pd.DataFrame()
 
-    #chromedriver_autoinstaller.install()
+    chromedriver_autoinstaller.install()
 
     for cas_number in cas_numbers:
-        #driver = webdriver.Chrome()
-        firefoxOptions = Options()
-        firefoxOptions.add_argument("--headless")
-        service = Service(GeckoDriverManager().install())
-        driver = webdriver.Firefox(
-            options=firefoxOptions,
-            service=service,)
+        driver = webdriver.Chrome()
+        #firefoxOptions = Options()
+        #firefoxOptions.add_argument("--headless")
+        #service = Service(GeckoDriverManager().install())
+        #driver = webdriver.Firefox(
+        #    options=firefoxOptions,
+        #    service=service,)
         try:
             # Inicializar o navegador
             
@@ -185,19 +183,18 @@ def echa_extractor(cas_numbers):
     if isinstance(cas_numbers, str):
         cas_numbers = [cas_numbers]
     
-    # Instalar e configurar o driver automaticamente
     echa_data = pd.DataFrame()
 
-    #chromedriver_autoinstaller.install()
+    chromedriver_autoinstaller.install()
 
     for cas_number in cas_numbers:
-        #driver = webdriver.Chrome()
-        firefoxOptions = Options()
-        firefoxOptions.add_argument("--headless")
-        service = Service(GeckoDriverManager().install())
-        driver = webdriver.Firefox(
-            options=firefoxOptions,
-            service=service,)
+        driver = webdriver.Chrome()
+        #firefoxOptions = Options()
+        #firefoxOptions.add_argument("--headless")
+        #service = Service(GeckoDriverManager().install())
+        #driver = webdriver.Firefox(
+        #    options=firefoxOptions,
+        #    service=service,)
         try:
             # Acessar a página
             driver.get("https://echa.europa.eu/pt/information-on-chemicals")
