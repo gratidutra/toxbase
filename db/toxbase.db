@@ -1,0 +1,20 @@
+/*CREATE IF NOT EXISTS DATABASE toxbase;*/
+
+USE toxbase;
+
+CREATE TABLE IF NOT EXISTS pubchem (
+	id	INTEGER (50) NOT NULL AUTO_INCREMENT,
+	cas_number	VARCHAR(40) NOT NULL,
+	cit	VARCHAR(40) NOT NULL,
+	molecular_formula VARCHAR(300) NOT NULL,
+    synonyms VARCHAR(300) NOT NULL,
+    molecular_weight VARCHAR(300) NOT NULL,
+    dates VARCHAR(300) NOT NULL,
+    description VARCHAR(400) NOT NULL,
+	PRIMARY KEY(id),
+    created_date  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_date  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+/*criar o bd do echa*/
+
