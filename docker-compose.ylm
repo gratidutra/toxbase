@@ -1,0 +1,22 @@
+version: "3"
+
+web:
+    container_name: web
+    command: bash ../scripts/run_webserver.sh
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - selenium
+    links:
+      - selenium
+      - ./:/app
+
+ selenium:
+    image: selenium/standalone-chromium:latest
+    container_name: selenium_chrome
+    shm_size: 2g  # Evita problemas de memória compartilhada no Chrome
+    ports:
+      - "4444:4444"  # Para comunicação WebDriver
+      - "5900:5900"  # VNC (opcional, para depuração)
+      - "7900:7900"  # NoVNC (opcional, para ver o navegador rodando)

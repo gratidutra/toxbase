@@ -1,0 +1,19 @@
+[project]
+name = "toxbase"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "gratidutra",email = "gratirodrigues.gdr@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "psycopg (>=3.2.4,<4.0.0)",
+    "selenium (>=4.28.1,<5.0.0)",
+    "python-dotenv (>=1.0.1,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
