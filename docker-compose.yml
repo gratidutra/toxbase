@@ -1,0 +1,34 @@
+version: '3.9'
+
+services:
+  flask_app:
+    build: .
+    container_name: flask_app
+    ports:
+      - "5000:5000"
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - SELENIUM_HOST=${SELENIUM_HOST}
+    depends_on:
+      - selenium
+    networks:
+      - my_network
+    command: ["python", "app.py"]
+
+  selenium:
+    image: selenium/standalone-chromium:latest
+    container_name: selenium_chrome
+    ports:
+      - "4444:4444"
+      - "5900:5900"
+      - "7900:7900"
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge
