@@ -12,8 +12,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.firefox.options import Options as Options_f
+from selenium.webdriver.chrome.options import Options
+
 import os
 
 logging.basicConfig(level=logging.DEBUG)
@@ -97,19 +98,18 @@ def pubchem_extractor(cas_numbers):
 
     pubchem_data = pd.DataFrame()
 
-    #chromedriver_autoinstaller.install()
+    #selenium_host = os.getenv("SELENIUM_HOST", "localhost")  
 
-    selenium_host = os.getenv("SELENIUM_HOST", "localhost")  
+    # Set the desired capabilities using Options
+    options = Options_f()
+    options.browser_name = "firefox"
+    options.browser_version = "125.0" 
+
 
     for cas_number in cas_numbers:
-        #driver = webdriver.Chrome()
-        options = webdriver.ChromeOptions()
-        #options.add_argument("--headless")  # Executa sem interface gráfica
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-
+        # Initialize the WebDriver with the options
         driver = webdriver.Remote(
-            command_executor=f"http://{selenium_host}:4444/wd/hub",
+            command_executor="http://selenoid:4444/wd/hub",
             options=options
         )
         try:
@@ -196,24 +196,25 @@ def echa_extractor(cas_numbers):
 
     #chromedriver_autoinstaller.install()
 
-    selenium_host = os.getenv("SELENIUM_HOST", "localhost") 
+    options = Options()
+    options.browser_name = "chrome"
+    options.browser_version = "127.0" 
+
+    #selenium_host = os.getenv("SELENIUM_HOST", "localhost") 
     for cas_number in cas_numbers:
-        #driver = webdriver.Chrome()
-       options = webdriver.ChromeOptions()
-    options.add_argument("--disable-dev-shm-usage")
-    
-    driver = webdriver.Remote(
-        command_executor=f"http://{selenium_host}:4444/wd/hub",
-        options=options
-    )
+        # Initialize the WebDriver with the options
+        driver2 = webdriver.Remote(
+            command_executor="http://selenoid:4444/wd/hub",
+            options=options
+        )
 
     try:
         # Acessar a página
-        driver.get("https://echa.europa.eu/pt/information-on-chemicals")
+        driver2.get("https://echa.europa.eu/pt/information-on-chemicals")
 
         # Configurar WebDriverWait
-        wait = WebDriverWait(driver, 20)
-        actions = ActionChains(driver)
+        wait = WebDriverWait(driver2, 30)
+        actions = ActionChains(driver2)
 
         # Aceitar cookies
         cookie_button = wait.until(
@@ -244,7 +245,7 @@ def echa_extractor(cas_numbers):
         logging.debug("Número CAS inserido.")
 
         # Aguardar até que o primeiro elemento de resultados esteja visível
-        element = WebDriverWait(driver, 15).until(
+        element = WebDriverWait(driver2, 30).until(
             EC.element_to_be_clickable(
                 (By.XPATH, '//*[@id="_disssimplesearch_WAR_disssearchportlet_rmlSearchResultVOsSearchContainerSearchContainer"]/table/tbody/tr[1]/td[1]/a')
             )
@@ -257,27 +258,27 @@ def echa_extractor(cas_numbers):
             (By.XPATH, '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[1]')
         )).text
         
-        cas = driver.find_element(
+        cas = driver2.find_element(
             By.XPATH, '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[3]'
         ).text
         
-        molecular_formula = driver.find_element(
+        molecular_formula = driver2.find_element(
             By.XPATH, '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[3]'
         ).text
         
-        haz_classification_labelling = driver.find_element(
+        haz_classification_labelling = driver2.find_element(
             By.XPATH, '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[2]/div/div/div/p'
         ).text
         
-        about_1 = driver.find_element(
+        about_1 = driver2.find_element(
             By.XPATH, '//*[@id="aboutSubstanceParagraphWrapper"]/p[1]'
         ).text
         
-        about_2 = driver.find_element(
+        about_2 = driver2.find_element(
             By.XPATH, '//*[@id="aboutSubstanceParagraphWrapper"]/p[2]'
         ).text
         
-        consumer_user = driver.find_element(
+        consumer_user = driver2.find_element(
             By.XPATH, '//*[@id="aboutSubstanceParagraphWrapper"]/p[3]'
         ).text
 
@@ -299,8 +300,8 @@ def echa_extractor(cas_numbers):
         logging.error(f"Erro na funcao1: {e}")
     finally:
         # Fechar o navegador
-        if driver:
-            driver.quit()
+        if driver2:
+            driver2.quit()
             logging.debug("Driver fechado na funcao1")
 
     return echa_data

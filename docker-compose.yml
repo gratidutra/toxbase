@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.8'
 
 services:
   flask_app:
@@ -12,20 +12,37 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
-      - SELENIUM_HOST=${SELENIUM_HOST}
+      - SELENIUM_HOST=selenoid
     depends_on:
-      - selenium
+      - selenoid
     networks:
       - my_network
     command: ["python", "app.py"]
 
-  selenium:
-    image: selenium/standalone-chromium:latest
-    container_name: selenium_chrome
+  selenoid:
+    network_mode: bridge
+    image: aerokube/selenoid:latest-release
+    container_name: selenoid
+    volumes:
+      - ./selenoid/config:/etc/selenoid
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./selenoid/video:/opt/selenoid/video
+      - ./selenoid/logs:/opt/selenoid/logs
+    environment:
+      - OVERRIDE_VIDEO_OUTPUT_DIR=/opt/selenoid/video
+    command: ["-conf", "/etc/selenoid/browsers.json", "-video-output-dir", "/opt/selenoid/video", "-log-output-dir", "/opt/selenoid/logs"]
     ports:
       - "4444:4444"
-      - "5900:5900"
-      - "7900:7900"
+
+  selenoid-ui:
+    image: aerokube/selenoid-ui:latest
+    container_name: selenoid-ui
+    ports:
+      - "8080:8080"
+    environment:
+      - SELENOID_URL=http://selenoid:4444
+    depends_on:
+      - selenoid
     networks:
       - my_network
 
