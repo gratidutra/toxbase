@@ -1,5 +1,10 @@
 version: '3.8'
 
+networks:
+  selenoid:
+    external: 
+      name: selenoid  # Usa a rede já criada manualmente
+
 services:
   flask_app:
     build: .
@@ -12,15 +17,14 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
-      - SELENIUM_HOST=selenoid
+      - SELENIUM_HOST=http://selenoid:4444/wd/hub
     depends_on:
       - selenoid
     networks:
-      - my_network
+      - selenoid
     command: ["python", "app.py"]
 
   selenoid:
-    network_mode: bridge
     image: aerokube/selenoid:latest-release
     container_name: selenoid
     volumes:
@@ -30,9 +34,11 @@ services:
       - ./selenoid/logs:/opt/selenoid/logs
     environment:
       - OVERRIDE_VIDEO_OUTPUT_DIR=/opt/selenoid/video
-    command: ["-conf", "/etc/selenoid/browsers.json", "-video-output-dir", "/opt/selenoid/video", "-log-output-dir", "/opt/selenoid/logs"]
+    command: ["-conf", "/etc/selenoid/browsers.json", "-video-output-dir", "/opt/selenoid/video", "-log-output-dir", "/opt/selenoid/logs", "-container-network", "selenoid"]
     ports:
       - "4444:4444"
+    networks:
+      - selenoid
 
   selenoid-ui:
     image: aerokube/selenoid-ui:latest
@@ -44,8 +50,14 @@ services:
     depends_on:
       - selenoid
     networks:
-      - my_network
+      - selenoid
 
-networks:
-  my_network:
-    driver: bridge
+  selenoid-firefox:
+      networks:
+        - selenoid
+      image: selenoid/firefox:125.0
+
+  selenoid-chrome:
+      networks:
+        - selenoid
+      image: selenoid/chrome:127.0

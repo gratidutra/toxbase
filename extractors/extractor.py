@@ -12,7 +12,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.firefox.options import Options as Options_f
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.firefox.options import Options_f
 from selenium.webdriver.chrome.options import Options
 
 import os
@@ -98,19 +99,22 @@ def pubchem_extractor(cas_numbers):
 
     pubchem_data = pd.DataFrame()
 
-    #selenium_host = os.getenv("SELENIUM_HOST", "localhost")  
-
-    # Set the desired capabilities using Options
+    # Definir as opções do Firefox
     options = Options_f()
-    options.browser_name = "firefox"
-    options.browser_version = "125.0" 
+    options.add_argument('--headless')  # Rodar sem interface gráfica
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
 
+    # Configurações de capacidades para o Firefox no Selenoid
+    capabilities = DesiredCapabilities.FIREFOX.copy()
+    capabilities['platform'] = 'LINUX'
 
     for cas_number in cas_numbers:
         # Initialize the WebDriver with the options
         driver = webdriver.Remote(
             command_executor="http://selenoid:4444/wd/hub",
-            options=options
+            options=options,
+            desired_capabilities=capabilities
         )
         try:
             # Inicializar o navegador
@@ -197,15 +201,20 @@ def echa_extractor(cas_numbers):
     #chromedriver_autoinstaller.install()
 
     options = Options()
-    options.browser_name = "chrome"
-    options.browser_version = "127.0" 
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
 
-    #selenium_host = os.getenv("SELENIUM_HOST", "localhost") 
+    # Usando as capacidades do Chrome de forma correta
+    capabilities = DesiredCapabilities.CHROME.copy()
+    capabilities['platform'] = 'LINUX'
+
     for cas_number in cas_numbers:
         # Initialize the WebDriver with the options
         driver2 = webdriver.Remote(
-            command_executor="http://selenoid:4444/wd/hub",
-            options=options
+            command_executor='http://selenoid:4444/wd/hub',
+            options=options,
+            desired_capabilities=capabilities
         )
 
     try:
