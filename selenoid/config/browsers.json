@@ -5,19 +5,17 @@
           "127.0": {
               "image": "selenoid/chrome:127.0",
               "port": "4444",
-              "path": "/",
-              "sessionAttemptTimeout": "90s"  
+              "path": "/"
           }
       }
   },
   "firefox": {
-      "default": "125.0",
+      "default": "124.0",
       "versions": {
-          "125.0": {
-              "image": "selenoid/firefox:125.0",
+          "124.0": {
+              "image": "selenoid/firefox:124.0",
               "port": "4444",
-              "path": "/",
-              "sessionAttemptTimeout": "90s"  
+              "path": "/wd/hub"  
           }
       }
   }

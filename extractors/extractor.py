@@ -1,4 +1,4 @@
-#import chromedriver_autoinstaller
+# import chromedriver_autoinstaller
 import time
 import xml.etree.ElementTree as ET
 import logging
@@ -12,13 +12,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.firefox.options import Options as Options_f
 from selenium.webdriver.chrome.options import Options
 
 import os
 
 logging.basicConfig(level=logging.DEBUG)
+
 
 def fetch_toxin_xml(toxin_id):
     """
@@ -100,21 +100,15 @@ def pubchem_extractor(cas_numbers):
     pubchem_data = pd.DataFrame()
 
     # Definir as opções do Firefox
-    options = Options_f()
-    options.add_argument('--headless')  # Rodar sem interface gráfica
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-
-    # Configurações de capacidades para o Firefox no Selenoid
-    capabilities = DesiredCapabilities.FIREFOX.copy()
-    capabilities['platform'] = 'LINUX'
+    options = Options()
+    options.add_argument("--headless")  # Rodar sem interface gráfica
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
 
     for cas_number in cas_numbers:
         # Initialize the WebDriver with the options
         driver = webdriver.Remote(
-            command_executor="http://selenoid:4444/wd/hub",
-            options=options,
-            desired_capabilities=capabilities
+            command_executor="http://selenoid:4444/wd/hub", options=options
         )
         try:
             # Inicializar o navegador
@@ -198,120 +192,118 @@ def echa_extractor(cas_numbers):
     # Instalar e configurar o driver automaticamente
     echa_data = pd.DataFrame()
 
-    #chromedriver_autoinstaller.install()
-
-    options = Options()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-
-    # Usando as capacidades do Chrome de forma correta
-    capabilities = DesiredCapabilities.CHROME.copy()
-    capabilities['platform'] = 'LINUX'
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
 
     for cas_number in cas_numbers:
-        # Initialize the WebDriver with the options
-        driver2 = webdriver.Remote(
-            command_executor='http://selenoid:4444/wd/hub',
-            options=options,
-            desired_capabilities=capabilities
-        )
-
-    try:
-        # Acessar a página
-        driver2.get("https://echa.europa.eu/pt/information-on-chemicals")
-
-        # Configurar WebDriverWait
-        wait = WebDriverWait(driver2, 30)
-        actions = ActionChains(driver2)
-
-        # Aceitar cookies
-        cookie_button = wait.until(
-            EC.element_to_be_clickable(
-                (By.XPATH, '//*[@id="cookie-consent-banner"]/div/div/div[2]/a[1]')
+        try:
+            # Initialize the WebDriver with the options
+            driver = webdriver.Remote(
+                command_executor="http://selenoid:4444/wd/hub", options=options
             )
-        )
-        actions.move_to_element(cookie_button).click().perform()
-        logging.debug("Cookies aceitos.")
-        
-        # Esperar o checkbox ficar visível e então clicar
-        checkbox = wait.until(
-            EC.presence_of_element_located(
-                (By.XPATH, '//*[@id="_disssimplesearchhomepage_WAR_disssearchportlet_fm"]/div[2]/label/span')
+            print(f"WebDriver inicializado para o CAS Number: {cas_number}")
+
+            # Acessar a página
+            driver.get("https://echa.europa.eu/pt/information-on-chemicals")
+            print("Página acessada com sucesso")
+
+            # Configurar WebDriverWait
+            wait = WebDriverWait(driver, 15)
+            actions = ActionChains(driver)
+
+            # Aceitar cookies
+            cookie_button = wait.until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, '//*[@id="cookie-consent-banner"]/div/div/div[2]/a[1]')
+                )
             )
-        )
-        actions.move_to_element(checkbox).click().perform()
-        logging.debug("Checkbox selecionado.")
-        
-        # Inserir o número CAS na barra de pesquisa
-        search = wait.until(
-            EC.presence_of_element_located(
-                (By.XPATH, '//*[@id="autocompleteKeywordInput"]')
+            cookie_button.click()
+            print('Cookies aceitos')
+            time.sleep(2)
+
+            # Selecionar checkbox
+            checkbox = wait.until(
+                EC.presence_of_element_located(
+                    (
+                        By.XPATH,
+                        '//*[@id="_disssimplesearchhomepage_WAR_disssearchportlet_fm"]/div[2]/label/span',
+                    )
+                )
             )
-        )
-        search.send_keys(cas_number)
-        search.send_keys(Keys.RETURN)
-        logging.debug("Número CAS inserido.")
+            actions.move_to_element(checkbox).click().perform()
+            print("Checkbox selecionado")
+            time.sleep(2)
 
-        # Aguardar até que o primeiro elemento de resultados esteja visível
-        element = WebDriverWait(driver2, 30).until(
-            EC.element_to_be_clickable(
-                (By.XPATH, '//*[@id="_disssimplesearch_WAR_disssearchportlet_rmlSearchResultVOsSearchContainerSearchContainer"]/table/tbody/tr[1]/td[1]/a')
+            # Inserir o número CAS na barra de pesquisa
+            search = driver.find_element(By.XPATH, '//*[@id="autocompleteKeywordInput"]')
+            search.send_keys(cas_number)
+            search.send_keys(Keys.RETURN)
+            print("Número CAS inserido e pesquisa realizada")
+            time.sleep(2)
+
+            # Aguardar até que o elemento esteja visível e clicável
+            element = wait.until(
+                EC.element_to_be_clickable(
+                    (
+                        By.XPATH,
+                        '//*[@id="_disssimplesearch_WAR_disssearchportlet_rmlSearchResultVOsSearchContainerSearchContainer"]/table/tbody/tr[1]/td[1]/a',
+                    )
+                )
             )
-        )
-        element.click()
-        logging.debug("Primeiro resultado clicado.")
-        
-        # Esperar a página de detalhes carregar e extrair dados
-        ec = wait.until(EC.presence_of_element_located(
-            (By.XPATH, '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[1]')
-        )).text
-        
-        cas = driver2.find_element(
-            By.XPATH, '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[3]'
-        ).text
-        
-        molecular_formula = driver2.find_element(
-            By.XPATH, '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[3]'
-        ).text
-        
-        haz_classification_labelling = driver2.find_element(
-            By.XPATH, '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[2]/div/div/div/p'
-        ).text
-        
-        about_1 = driver2.find_element(
-            By.XPATH, '//*[@id="aboutSubstanceParagraphWrapper"]/p[1]'
-        ).text
-        
-        about_2 = driver2.find_element(
-            By.XPATH, '//*[@id="aboutSubstanceParagraphWrapper"]/p[2]'
-        ).text
-        
-        consumer_user = driver2.find_element(
-            By.XPATH, '//*[@id="aboutSubstanceParagraphWrapper"]/p[3]'
-        ).text
+            element.click()
+            print("Elemento clicado")
+            time.sleep(2)
 
-        # Criar um dicionário com os dados extraídos
-        dict_data = {
-            "CAS Number": [cas],
-            "EC": [ec],
-            "Fórmula Molecular": [molecular_formula],
-            "HAZ Classificação": [haz_classification_labelling],
-            "Sobre 1": [about_1],
-            "Sobre 2": [about_2],
-            "Uso Consumidor": [consumer_user],
-        }
+            # Extração de informações específicas
+            ec = driver.find_element(
+                By.XPATH,
+                '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[1]',
+            ).text
+            cas = driver.find_element(
+                By.XPATH,
+                '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[3]',
+            ).text
+            molecular_formula = driver.find_element(
+                By.XPATH,
+                '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[3]',
+            ).text
+            haz_classification_labelling = driver.find_element(
+                By.XPATH,
+                '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[2]/div/div/div/p',
+            ).text
+            about_1 = driver.find_element(
+                By.XPATH, '//*[@id="aboutSubstanceParagraphWrapper"]/p[1]'
+            ).text
+            about_2 = driver.find_element(
+                By.XPATH, '//*[@id="aboutSubstanceParagraphWrapper"]/p[2]'
+            ).text
+            consumer_user = driver.find_element(
+                By.XPATH, '//*[@id="aboutSubstanceParagraphWrapper"]/p[3]'
+            ).text
 
-        data = pd.DataFrame(dict_data)
-        echa_data = pd.concat([echa_data, data], ignore_index=True)
+            # Criar um dicionário com os dados extraídos
+            dict_data = {
+                "CAS Number": [cas],
+                "EC": [ec],
+                "Fórmula Molecular": [molecular_formula],
+                "HAZ Classificação": [haz_classification_labelling],
+                "Sobre 1": [about_1],
+                "Sobre 2": [about_2],
+                "Uso Consumidor": [consumer_user],
+            }
 
-    except Exception as e:
-        logging.error(f"Erro na funcao1: {e}")
-    finally:
-        # Fechar o navegador
-        if driver2:
-            driver2.quit()
-            logging.debug("Driver fechado na funcao1")
+            data = pd.DataFrame(dict_data)
+            echa_data = pd.concat([echa_data, data], ignore_index=True)
+            print(f"Dados extraídos para o CAS Number: {cas_number}")
+
+        except Exception as e:
+            print(f"Erro ao processar o CAS Number {cas_number}: {e}")
+        finally:
+            # Fechar o navegador
+            driver.quit()
+            print("WebDriver fechado")
 
     return echa_data
 
@@ -322,7 +314,7 @@ def extract_data(cas_numbers, databases):
     e chama as funções corretas para extração, retornando DataFrames.
     """
     cas_list = [cas.strip() for cas in cas_numbers.split(",") if cas.strip()]
-    
+
     if not cas_list:
         return {}
 
