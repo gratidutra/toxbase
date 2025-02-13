@@ -27,4 +27,4 @@ ENV CHROME_BIN=/usr/bin/chromium
 RUN chmod +x setup.sh
 
 # Executa o setup.sh e depois o Flask
-CMD setup.sh && python app.py
+CMD ["setup.sh" "python", "app.py"]
