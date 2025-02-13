@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
 
 # Atualiza o pip e instala as dependências
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install -r requirements.txt
 
 # Baixa as imagens do Selenoid
 RUN docker network create selenoid \
