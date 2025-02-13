@@ -1,7 +1,7 @@
 Flask>=2.2.0
 psycopg2-binary==2.9.10
 selenium==3.141.0
-#pandas==1.3.3
+pandas==1.3.3
 python-dotenv==0.19.1
 chromedriver-autoinstaller==0.2.2
 pandas==2.2.3
