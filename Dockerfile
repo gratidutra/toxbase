@@ -24,7 +24,7 @@ ENV CHROME_BIN=/usr/bin/chromium
 
 
 # Dá permissão de execução ao script setup.sh
-#RUN chmod +x setup.sh
+RUN chmod +x setup.sh
 
-# Executa o setup.sh e depois o Flask
-CMD ["python" "app.py"]
+# Define o comando final para rodar o app
+CMD ["bash", "-c", "./setup.sh && python app.py"]
