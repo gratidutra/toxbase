@@ -6,10 +6,8 @@ import os
 
 load_dotenv()
 
-
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")  # Para mensagens flash no Flask
-
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -77,4 +75,4 @@ def index():
     return render_template("index.html", results=results)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=1000, debug=True)
