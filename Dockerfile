@@ -16,11 +16,6 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
-# Baixa as imagens do Selenoid
-RUN docker network create selenoid \
-    docker pull selenoid/chrome:127.0 && \
-    docker pull selenoid/firefox:124.0
-
 # Expõe a porta 5000 (a porta padrão do Flask)
 EXPOSE 5000
 
