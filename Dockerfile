@@ -22,5 +22,9 @@ EXPOSE 5000
 # Define a variável de ambiente para o caminho do Chrome
 ENV CHROME_BIN=/usr/bin/chromium
 
-# Comando para rodar o Flask
-CMD ["python", "app.py"]
+
+# Dá permissão de execução ao script setup.sh
+RUN chmod +x setup.sh
+
+# Executa o setup.sh e depois o Flask
+CMD ./setup.sh && python app.py
