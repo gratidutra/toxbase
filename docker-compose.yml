@@ -50,13 +50,3 @@ services:
       - selenoid
     networks:
       - selenoid
-
-  chrome:
-    image: selenoid/chrome:127.0
-    networks:
-      - selenoid
-
-  firefox:
-    image: selenoid/firefox:124.0
-    networks:
-      - selenoid
