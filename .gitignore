@@ -1,0 +1,5 @@
+__pycache__
+.virtual_documents
+data/
+.ipynb_checkpoints/Untitled-checkpoint.ipynb
+.env
