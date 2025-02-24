@@ -1,3 +1,4 @@
+# import chromedriver_autoinstaller
 import time
 import xml.etree.ElementTree as ET
 import logging
@@ -99,7 +100,7 @@ def pubchem_extractor(cas_numbers):
     pubchem_data = pd.DataFrame()
 
     # Definir as opções do Firefox
-    options = Options_f()
+    options = Options()
     options.add_argument("--headless")  # Rodar sem interface gráfica
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
@@ -191,7 +192,6 @@ def echa_extractor(cas_numbers):
     # Instalar e configurar o driver automaticamente
     echa_data = pd.DataFrame()
 
-    options = Options()
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
