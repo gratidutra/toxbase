@@ -1,8 +1,3 @@
-<<<<<<< HEAD:extractor.py
-import chromedriver_autoinstaller
-=======
-# import chromedriver_autoinstaller
->>>>>>> render:extractors/extractor.py
 import time
 import xml.etree.ElementTree as ET
 import logging
@@ -16,18 +11,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-<<<<<<< HEAD:extractor.py
-#from selenium.webdriver.firefox.options import Options
-#from selenium.webdriver.firefox.service import Service
-#from webdriver_manager.firefox import GeckoDriverManager
-=======
 from selenium.webdriver.firefox.options import Options as Options_f
 from selenium.webdriver.chrome.options import Options
 
 import os
 
 logging.basicConfig(level=logging.DEBUG)
->>>>>>> render:extractors/extractor.py
 
 
 def fetch_toxin_xml(toxin_id):
@@ -109,20 +98,8 @@ def pubchem_extractor(cas_numbers):
 
     pubchem_data = pd.DataFrame()
 
-<<<<<<< HEAD:extractor.py
-    chromedriver_autoinstaller.install()
-
-    for cas_number in cas_numbers:
-        driver = webdriver.Chrome()
-        #firefoxOptions = Options()
-        #firefoxOptions.add_argument("--headless")
-        #service = Service(GeckoDriverManager().install())
-        #driver = webdriver.Firefox(
-        #    options=firefoxOptions,
-        #    service=service,)
-=======
     # Definir as opções do Firefox
-    options = Options()
+    options = Options_f()
     options.add_argument("--headless")  # Rodar sem interface gráfica
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
@@ -132,7 +109,6 @@ def pubchem_extractor(cas_numbers):
         driver = webdriver.Remote(
             command_executor="http://selenoid:4444/wd/hub", options=options
         )
->>>>>>> render:extractors/extractor.py
         try:
             # Inicializar o navegador
 
@@ -211,32 +187,17 @@ def echa_extractor(cas_numbers):
     # Certificar-se de que cas_numbers é uma lista
     if isinstance(cas_numbers, str):
         cas_numbers = [cas_numbers]
-<<<<<<< HEAD:extractor.py
-    
-    echa_data = pd.DataFrame()
-
-    chromedriver_autoinstaller.install()
-
-    for cas_number in cas_numbers:
-        driver = webdriver.Chrome()
-        #firefoxOptions = Options()
-        #firefoxOptions.add_argument("--headless")
-        #service = Service(GeckoDriverManager().install())
-        #driver = webdriver.Firefox(
-        #    options=firefoxOptions,
-        #    service=service,)
-=======
 
     # Instalar e configurar o driver automaticamente
     echa_data = pd.DataFrame()
 
+    options = Options()
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
     for cas_number in cas_numbers:
->>>>>>> render:extractors/extractor.py
         try:
             # Initialize the WebDriver with the options
             driver = webdriver.Remote(
@@ -253,13 +214,6 @@ def echa_extractor(cas_numbers):
             actions = ActionChains(driver)
 
             # Aceitar cookies
-<<<<<<< HEAD:extractor.py
-            cookie_button = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="cookie-consent-banner"]/div/div/div[2]/a[1]')))
-            actions.move_to_element(cookie_button).click().perform()
-            
-            time.sleep(5)
-            
-=======
             cookie_button = wait.until(
                 EC.element_to_be_clickable(
                     (By.XPATH, '//*[@id="cookie-consent-banner"]/div/div/div[2]/a[1]')
@@ -269,7 +223,6 @@ def echa_extractor(cas_numbers):
             print('Cookies aceitos')
             time.sleep(2)
 
->>>>>>> render:extractors/extractor.py
             # Selecionar checkbox
             checkbox = wait.until(
                 EC.presence_of_element_located(
@@ -280,15 +233,9 @@ def echa_extractor(cas_numbers):
                 )
             )
             actions.move_to_element(checkbox).click().perform()
-<<<<<<< HEAD:extractor.py
-            
-            time.sleep(5)
-            
-=======
             print("Checkbox selecionado")
             time.sleep(2)
 
->>>>>>> render:extractors/extractor.py
             # Inserir o número CAS na barra de pesquisa
             search = driver.find_element(By.XPATH, '//*[@id="autocompleteKeywordInput"]')
             search.send_keys(cas_number)

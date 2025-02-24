@@ -23,7 +23,7 @@ EXPOSE 5000
 ENV CHROME_BIN=/usr/bin/chromium
 
 # Dá permissão de execução ao script setup.sh
-RUN bash ../setup.sh
+#RUN bash ../setup.sh
 
 # Define o comando final para rodar o app
 CMD ["python" "app.py"]

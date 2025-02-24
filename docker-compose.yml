@@ -2,8 +2,7 @@ version: '3.8'
 
 networks:
   selenoid:
-    external: 
-      name: selenoid  # Usa a rede já criada manualmente
+    external: false
 
 services:
   flask_app:
