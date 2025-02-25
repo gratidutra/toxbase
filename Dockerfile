@@ -16,6 +16,9 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
+# Definir o diretório onde está o código-fonte
+WORKDIR /app/src
+
 # Expõe a porta 5000 (a porta padrão do Flask)
 EXPOSE 5000
 
@@ -26,4 +29,4 @@ ENV CHROME_BIN=/usr/bin/chromium
 #RUN bash ../setup.sh
 
 # Define o comando final para rodar o app
-CMD ["python" "app.py"]
+CMD ["python" "run.py"]

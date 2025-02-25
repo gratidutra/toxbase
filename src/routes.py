@@ -1,16 +1,20 @@
-from flask import Flask, render_template, request, flash
+from flask import Flask, render_template, request, redirect, url_for, flash
 from src.database import connection_db
 from extractors.extractor import extract_data
 from dotenv import load_dotenv
 import os
+from src import app, db, bcrypt
+from src.models import Users
+from src.forms import RegisterForm
 
 load_dotenv()
 
-app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY")  # Para mensagens flash no Flask
+@app.route("/")
+def home():
+    return render_template("home.html")
 
-@app.route("/", methods=["GET", "POST"])
-def index():
+@app.route("/toxins_finder", methods=["GET", "POST"])
+def toxins_finder():
     results = None  
 
     if request.method == "POST":
@@ -72,7 +76,32 @@ def index():
 
             results = {cas: {db_name: data.to_html(classes='table table-striped') for db_name, data in dbs.items()} for cas, dbs in df_results.items()}
 
-    return render_template("index.html", results=results)
+    return render_template("toxins_finder.html", results=results)
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=1000, debug=True)
+@app.route("/register/", methods=["GET", "POST"])
+def register():
+    form = RegisterForm()
+
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
+
+        new_user = Users(
+            name=form.name.data,
+            email=form.email.data,
+            password_hash=hashed_password
+        )
+
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+            flash("Usuário registrado com sucesso!", "success")
+            return redirect(url_for("login"))  # Ajuste para sua rota de login
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Erro ao registrar usuário: {e}", "danger")
+
+    if form.errors:
+        for err in form.errors.values():
+            flash(f"Erro no registro: {err}", "danger")
+
+    return render_template("register.html", form=form)

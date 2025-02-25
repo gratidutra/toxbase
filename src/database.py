@@ -4,7 +4,6 @@ import os
 
 load_dotenv()
 
-
 def connection_db():
     try:
         conn = pg.connect(

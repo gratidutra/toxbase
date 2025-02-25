@@ -21,7 +21,9 @@ services:
       - selenoid
     networks:
       - selenoid
-    command: ["python", "app.py"]
+    working_dir: /app  # Define que o Flask será executado a partir de /app
+    command: ["python", "src/run.py"] 
+
 
   selenoid:
     image: aerokube/selenoid:latest-release
