@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}
+Login
+{% endblock %}
+{% block content %}
+
+<body class="text-center">
+    <div style="width: 50%; height: 550px; float:left;">
+        <img class='mt-5'
+            src="https://img.freepik.com/free-vector/tablet-login-concept-illustration_114360-7863.jpg?w=740&t=st=1684781477~exp=1684782077~hmac=98dca87376e82b368aa6772ae6fe476c523ff431577406b43522255dd1a4a36e"
+            width="350" height="350">
+    </div>
+
+    <div style="width:50%; height: 550px; float:left;">
+        <h1 class="h3 mb-2 font-weight-normal">
+            Log in
+        </h1>
+        <form method="POST" class="form-signin; mt-5" style="color:whitesmoke">
+            {{form.hidden_tag()}}
+
+            {{ form.email.label() }}
+            {{ form.email(class='form-control', placeholder='Your E-mail') }}
+
+            {{ form.password.label() }}
+            {{ form.password(class='form-control', placeholder='Your password') }}
+            <br>
+            <div class="d-grid">
+                {{ form.submit(class="btn btn-md btn-primary") }}
+            </div>
+            <br>
+            <div class="Checkbox mb-3">
+                 <a href="{{url_for('recovery_passwordForm')}}"> <h6>Forgot Password?</h6> </a>
+            </div>
+            <div class="Checkbox mb-3">
+                <a href="{{url_for('register')}}"> <h6>Don't have an account yet?</h6> </a>
+            </div>
+        </form>
+    </div>
+   
+</body>
+{% endblock %}

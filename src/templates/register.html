@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}
+Form Register
+{% endblock %}
+{% block content %}
+
+<body class="text-center">
+    <div style="width: 50%; height: 550px; float:left;">
+        <img class='mt-5'
+            src="https://img.freepik.com/free-vector/sign-up-concept-illustration_114360-7865.jpg?t=st=1684781594~exp=1684782194~hmac=3c30cd46c08b95c7cbfdae368dba875a68638ef1624c65ab9373828bc9e41da4"
+            width="350" height="350">
+    </div>
+    <div style="width:50%; height: 550px; float:left;">
+        <h1 class="h3 mb-3 font-weight-normal">
+            Create your account
+        </h1>
+        <form method="POST" class="form-register" styler="color: withesmoke">
+            {{form.hidden_tag()}}
+
+            {{ form.name.label() }}
+            {{ form.name(class='form-control', placeholder='Your username') }}
+            <br>
+            {{ form.email.label() }}
+            {{ form.email(class='form-control', placeholder='Your E-mail') }}
+            <br>
+            {{ form.password.label() }}
+            {{ form.password(class='form-control', placeholder='Your password') }}
+            <br>
+            {{ form.password_conf.label() }}
+            {{ form.password_conf(class='form-control', placeholder='Confirm your password') }}
+
+            <br>
+            <div class="d-grid">
+                {{ form.submit(class="btn btn-lg btn-success") }}
+            </div>
+            <br>
+            <div class="Checkbox mb-3">
+                <a href="{{url_for('login')}}"> <h6>Already have an account?</h6></a>
+            </div>
+        </form>
+
+    </div>
+</body>
+{% endblock %}

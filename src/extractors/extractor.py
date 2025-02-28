@@ -1,21 +1,19 @@
 # import chromedriver_autoinstaller
+import logging
+import os
 import time
 import xml.etree.ElementTree as ET
-import logging
-
 
 import pandas as pd
 import requests
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.firefox.options import Options as Options_f
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.firefox.options import Options as Options_f
-from selenium.webdriver.chrome.options import Options
-
-import os
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -220,7 +218,7 @@ def echa_extractor(cas_numbers):
                 )
             )
             cookie_button.click()
-            print('Cookies aceitos')
+            print("Cookies aceitos")
             time.sleep(2)
 
             # Selecionar checkbox
@@ -237,7 +235,9 @@ def echa_extractor(cas_numbers):
             time.sleep(2)
 
             # Inserir o número CAS na barra de pesquisa
-            search = driver.find_element(By.XPATH, '//*[@id="autocompleteKeywordInput"]')
+            search = driver.find_element(
+                By.XPATH, '//*[@id="autocompleteKeywordInput"]'
+            )
             search.send_keys(cas_number)
             search.send_keys(Keys.RETURN)
             print("Número CAS inserido e pesquisa realizada")
