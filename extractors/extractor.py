@@ -17,9 +17,6 @@ from selenium.webdriver.chrome.options import Options
 
 import os
 
-logging.basicConfig(level=logging.DEBUG)
-
-
 def pubchem_extractor(cas_numbers):
 
     if isinstance(cas_numbers, str):
