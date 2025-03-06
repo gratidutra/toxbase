@@ -5,7 +5,8 @@
           "127.0": {
               "image": "selenoid/chrome:127.0",
               "port": "4444",
-              "path": "/"
+              "path": "/",
+              "maxInstances": 10
           }
       }
   },
@@ -15,7 +16,8 @@
           "124.0": {
               "image": "selenoid/firefox:124.0",
               "port": "4444",
-              "path": "/wd/hub"  
+              "path": "/wd/hub",
+              "maxInstances": 10
           }
       }
   }

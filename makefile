@@ -12,19 +12,19 @@ setup:
 # Builda a aplicação
 build:
 	@echo "Construindo os containers..."
-	@docker-compose up --build
+	@docker compose up --build
 	@echo "Build concluído!"
 
 # Sobe a aplicação
 up: setup build
 	@echo "Iniciando os containers..."
-	@docker-compose up -d
+	@docker compose up -d
 	@echo "Aplicação rodando!"
 
 # Derruba os containers
 down:
 	@echo "Derrubando os containers..."
-	@docker-compose down
+	@docker compose down
 
 # Remove containers, imagens não utilizadas e a rede
 clean: down

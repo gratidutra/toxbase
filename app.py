@@ -35,7 +35,7 @@ def index():
                             for _, row in data.iterrows():
                                 cursor.execute(
                                     """
-                                    INSERT INTO pubchem (cas_number, cit, molecular_formula, 
+                                    INSERT INTO pubchem (cas_number, cid, molecular_formula, 
                                                          synonyms, molecular_weight, dates, 
                                                          description, created_date, updated_date)
                                     VALUES (%s, %s, %s, %s, %s, %s,%s, NOW(), NOW())
@@ -75,4 +75,4 @@ def index():
     return render_template("index.html", results=results)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=1000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
