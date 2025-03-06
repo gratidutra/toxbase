@@ -38,14 +38,14 @@ def pubchem_extractor(cas_numbers):
         driver = webdriver.Remote(
             command_executor="http://selenoid:4444/wd/hub", options=options
         )
-        try:
+       try:
             # Inicializar o navegador
 
             # Acessar a página do PubChem
             url = "https://pubchem.ncbi.nlm.nih.gov/"
             driver.get(url)
 
-            time.sleep(3)
+            time.sleep(5)
 
             # Inserir o número CAS na barra de pesquisa
             search = driver.find_element(
@@ -66,7 +66,7 @@ def pubchem_extractor(cas_numbers):
             ).click()
 
             # Esperar para carregar os detalhes
-            time.sleep(30)
+            time.sleep(10)
 
              # Função auxiliar para buscar um elemento de forma segura
             def get_text_or_default(xpath, default="Não encontrado"):
