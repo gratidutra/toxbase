@@ -3,6 +3,7 @@ from src.database import connection_db
 from extractors.extractor import extract_data
 from dotenv import load_dotenv
 import os
+import time
 
 load_dotenv()
 
@@ -12,6 +13,7 @@ app.secret_key = os.getenv("SECRET_KEY")  # Para mensagens flash no Flask
 @app.route("/", methods=["GET", "POST"])
 def index():
     results = None  
+    start = time.time()
 
     if request.method == "POST":
         cas_numbers = request.form.get("cas_numbers")
@@ -60,7 +62,8 @@ def index():
                                 )
 
                 conn.commit()
-                flash("Dados armazenados com sucesso!", "success")
+                end = time.time()
+                flash(f"Dados armazenados com sucesso! {end-start:.4f} ", "success")
 
             except Exception as e:
                 conn.rollback()

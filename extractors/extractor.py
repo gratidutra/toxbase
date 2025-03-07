@@ -3,7 +3,6 @@ import time
 import xml.etree.ElementTree as ET
 import logging
 
-
 import pandas as pd
 import requests
 from selenium import webdriver
@@ -36,9 +35,8 @@ def pubchem_extractor(cas_numbers):
             command_executor="http://selenoid:4444/wd/hub", options=options
         )
         try:
-            # Inicializar o navegador
-
-            # Acessar a página do PubChem
+            
+ # Acessar a página do PubChem
             url = "https://pubchem.ncbi.nlm.nih.gov/"
             driver.get(url)
 
@@ -47,43 +45,37 @@ def pubchem_extractor(cas_numbers):
             # Inserir o número CAS na barra de pesquisa
             search = driver.find_element(
                 By.XPATH,
-                "/html/body/div[1]/div/div/main/div[1]/div/div[2]/div/div[2]/form/div/div[1]/input",
+                "/html/body/div[1]/div/div/main/div[1]/div/div[2]/div/div[2]/form/div/div[1]/input"
             )
             search.send_keys(cas_number)
             search.send_keys(Keys.RETURN)
 
-            # Aguardar até que o elemento clicável esteja disponível
-            WebDriverWait(driver, 10).until(
+             # Aguardar até que o elemento clicável esteja disponível
+            WebDriverWait(driver, 45).until(
                 EC.element_to_be_clickable(
                     (
                         By.XPATH,
-                        "/html/body/div[1]/div/div/main/div[2]/div[1]/div/div[2]/div/div[1]/div[2]/div[1]/a/span/span",
+                        "/html/body/div[1]/div/div/main/div[2]/div[2]/div[3]/div/div/div/div[2]/ul/li/div/div/div[1]/div[2]/div[1]/a/span/span"
                     )
                 )
             ).click()
 
             # Esperar para carregar os detalhes
-            time.sleep(5)
+            time.sleep(10)
+
+             # Função auxiliar para buscar um elemento de forma segura
+            def get_text_or_default(xpath, default="Não encontrado"):
+                elements = driver.find_elements(By.XPATH, xpath)
+                return elements[0].text if elements else default
 
             # Extração dos dados
-            cid = driver.find_element(
-                By.XPATH, '//div[text()="PubChem CID"]/following-sibling::div'
-            ).text
-            molecular_formula = driver.find_element(
-                By.XPATH, '//div[text()="Molecular Formula"]/following-sibling::div'
-            ).text
-            synonyms = driver.find_element(
-                By.XPATH, '//div[text()="Synonyms"]/following-sibling::div'
-            ).text
-            molecular_weight = driver.find_element(
-                By.XPATH, '//div[text()="Molecular Weight"]/following-sibling::div'
-            ).text
-            dates = driver.find_element(
-                By.XPATH, '//div[text()="Dates"]/following-sibling::div'
-            ).text
-            description = driver.find_element(
-                By.XPATH, '//div[text()="Description"]/following-sibling::div'
-            ).text
+            cid = get_text_or_default('//div[text()="PubChem CID"]/following-sibling::div')
+            molecular_formula = get_text_or_default('//div[text()="Molecular Formula"]/following-sibling::div')
+            synonyms = get_text_or_default('//div[text()="Synonyms"]/following-sibling::div')
+            molecular_weight = get_text_or_default('//div[text()="Molecular Weight"]/following-sibling::div')
+            dates = get_text_or_default('//div[text()="Dates"]/following-sibling::div')
+            description = get_text_or_default('//div[text()="Description"]/following-sibling::div')
+
 
             # Criar um dicionário com os dados extraídos
             dict_data = {
@@ -93,7 +85,7 @@ def pubchem_extractor(cas_numbers):
                 "Sinônimos": [synonyms],
                 "Peso Molecular": [molecular_weight],
                 "Datas": [dates],
-                "Descrição": [description],
+                "Descrição": [description]
             }
 
             # Criar um DataFrame e adicionar ao DataFrame final
@@ -107,7 +99,6 @@ def pubchem_extractor(cas_numbers):
             driver.quit()
 
     return pubchem_data
-
 
 def echa_extractor(cas_numbers):
     # Certificar-se de que cas_numbers é uma lista
@@ -145,7 +136,6 @@ def echa_extractor(cas_numbers):
                 )
             )
             cookie_button.click()
-            print('Cookies aceitos')
             time.sleep(2)
 
             # Selecionar checkbox
@@ -158,14 +148,12 @@ def echa_extractor(cas_numbers):
                 )
             )
             actions.move_to_element(checkbox).click().perform()
-            print("Checkbox selecionado")
             time.sleep(2)
 
             # Inserir o número CAS na barra de pesquisa
             search = driver.find_element(By.XPATH, '//*[@id="autocompleteKeywordInput"]')
             search.send_keys(cas_number)
             search.send_keys(Keys.RETURN)
-            print("Número CAS inserido e pesquisa realizada")
             time.sleep(2)
 
             # Aguardar até que o elemento esteja visível e clicável
@@ -178,35 +166,21 @@ def echa_extractor(cas_numbers):
                 )
             )
             element.click()
-            print("Elemento clicado")
-            time.sleep(2)
+            time.sleep(3)
+
+               # Função auxiliar para buscar um elemento de forma segura
+            def get_text_or_default(xpath, default="Não encontrado"):
+                elements = driver.find_elements(By.XPATH, xpath)
+                return elements[0].text if elements else default
 
             # Extração de informações específicas
-            ec = driver.find_element(
-                By.XPATH,
-                '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[1]',
-            ).text
-            cas = driver.find_element(
-                By.XPATH,
-                '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[3]',
-            ).text
-            molecular_formula = driver.find_element(
-                By.XPATH,
-                '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[3]',
-            ).text
-            haz_classification_labelling = driver.find_element(
-                By.XPATH,
-                '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[2]/div/div/div/p',
-            ).text
-            about_1 = driver.find_element(
-                By.XPATH, '//*[@id="aboutSubstanceParagraphWrapper"]/p[1]'
-            ).text
-            about_2 = driver.find_element(
-                By.XPATH, '//*[@id="aboutSubstanceParagraphWrapper"]/p[2]'
-            ).text
-            consumer_user = driver.find_element(
-                By.XPATH, '//*[@id="aboutSubstanceParagraphWrapper"]/p[3]'
-            ).text
+            ec = get_text_or_default('//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[1]')
+            cas = get_text_or_default('//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[3]')
+            molecular_formula = get_text_or_default('//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[3]')
+            haz_classification_labelling = get_text_or_default('//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[2]/div/div/div/p')
+            about_1 = get_text_or_default('//*[@id="aboutSubstanceParagraphWrapper"]/p[1]')
+            about_2 = get_text_or_default('//*[@id="aboutSubstanceParagraphWrapper"]/p[2]')
+            consumer_user = get_text_or_default('//*[@id="aboutSubstanceParagraphWrapper"]/p[3]')
 
             # Criar um dicionário com os dados extraídos
             dict_data = {
