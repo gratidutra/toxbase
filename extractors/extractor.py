@@ -56,11 +56,11 @@ def pubchem_extractor(cas_numbers):
             search.send_keys(Keys.RETURN)
 
              # Aguardar até que o elemento clicável esteja disponível
-            WebDriverWait(driver, 30).until(
+            WebDriverWait(driver, 17).until(
                 EC.element_to_be_clickable(
                     (
                         By.XPATH,
-                        "/html/body/div[1]/div/div/main/div[3]/div[2]/div[3]/div/div/div/div[2]/ul/li/div/div/div[1]/div[2]/div[1]/a/span/span",
+                        "/html/body/div[1]/div/div/main/div[2]/div[1]/div/div[2]/div/div[1]/div[2]/div[1]/a/span/span",
                     )
                 )
             ).click()
