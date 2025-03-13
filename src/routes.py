@@ -11,6 +11,7 @@ from src.database import connection_db
 from src.extractors.extractor import extract_data
 from src.forms import LoginForm, RecoveryPassword, RecoveryPasswordForm, RegisterForm
 from src.models import TokensPassword, Users
+from src.decorators import admin_required  # Importando o decorador
 
 load_dotenv()
 
@@ -18,23 +19,6 @@ load_dotenv()
 @app.route("/")
 def home():
     return render_template("home.html")
-
-
-@app.route("/register/", methods=["GET", "POST"])
-def register():
-    form = RegisterForm()
-    if form.validate_on_submit():
-        user = Users(
-            name=form.name.data, email=form.email.data, password_cryp=form.password.data
-        )
-        db.session.add(user)
-        db.session.commit()
-        return redirect(url_for("articles_extractor"))
-    if form.errors != {}:
-        for err in form.errors.values():
-            flash(f"Error user register {err}", category="danger")
-    return render_template("register.html", form=form)
-
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -48,13 +32,61 @@ def login():
             flash(
                 f"Success! You're logged in as: {user_logged.name}", category="success"
             )
-            return redirect(url_for("articles_extractor"))
+            return redirect(url_for("toxins_finder"))
         else:
             flash(f"Wrong email or password. Try again!", category="danger")
     return render_template("login.html", form=form)
 
+@app.route("/admin_area/", methods=["GET", "POST"])
+@login_required
+@admin_required
+def admin_area():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        user = Users(
+            name=form.name.data, email=form.email.data, password_cryp=form.password.data
+        )
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for("admin"))
+    if form.errors != {}:
+        for err in form.errors.values():
+            flash(f"Error user register {err}", category="danger")
+    
+    users = Users.query.all()
+    return render_template("admin_area.html", form=form, users=users)
+
+# Função de editar (exemplo)
+@app.route("/edit_user/<int:user_id>", methods=["GET", "POST"])
+@login_required
+@admin_required
+def edit_user(user_id):
+    user = Users.query.get_or_404(user_id)
+    form = RegisterForm(obj=user)
+    if form.validate_on_submit():
+        user.name = form.name.data
+        user.email = form.email.data
+        user.password = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
+        user.role = form.role.data
+        db.session.commit()
+        flash("User updated successfully!", "success")
+        return redirect(url_for("admin_area"))
+    return render_template("edit_user.html", form=form)
+
+# Função de excluir usuário
+@app.route("/delete_user/<int:user_id>", methods=["GET", "POST"])
+@login_required
+@admin_required
+def delete_user(user_id):
+    user = Users.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    flash("User deleted successfully!", "success")
+    return redirect(url_for("admin_area"))
+
 
 @app.route("/toxins_finder", methods=["GET", "POST"])
+@login_required
 def toxins_finder():
     results = None
 
@@ -137,6 +169,12 @@ def toxins_finder():
 
     return render_template("toxins_finder.html", results=results)
 
+
+@app.route("/admin")
+@admin_required
+@login_required
+def admin_dashboard():
+    return render_template("admin.html")
 
 @app.route("/recovery_password_form", methods=["GET", "POST"])
 def recovery_passwordForm():

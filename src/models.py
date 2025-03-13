@@ -6,19 +6,21 @@ from sqlalchemy import Text
 
 from src import bcrypt, db, login_manager
 
-db = SQLAlchemy()
-
+#db = SQLAlchemy()
 
 @login_manager.user_loader
 def load_user(user_id):
     return Users.query.get(int(user_id))
-
 
 class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(length=40), nullable=False, unique=True)
     email = db.Column(db.String(length=40), nullable=False, unique=True)
     password = db.Column(db.String(length=300), nullable=False, unique=True)
+    role = db.Column(db.String(20), nullable=False, default="user")  # 'admin' ou 'user'
+
+    def is_admin(self):
+        return self.role == "admin"
 
     @property
     def password_cryp(self):

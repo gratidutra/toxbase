@@ -3,25 +3,18 @@
 {% block content %}
 
 <body class="text-center">
-    <div style="width: 50%; height: 550px; display: flex; justify-content: center; align-items: center; float: left;">
-        <img class="mt-5"
-            src="https://static.wixstatic.com/media/7cc6c2_9ce4730cc31c4cacaba6c8a92ac030e8~mv2.png"
-            width="500" height="145">
-    </div>
+    <!-- Div com o conteúdo do TOXBASE -->
     <div class="d-flex justify-content-center align-items-center vh-100">
         <div class="d-flex flex-column justify-content-center align-items-center text-center p-5" 
             style="width: 80%; max-width: 750px; height: 400px; background-color: #2156b8; 
                    color: white; padding: 60px; border-radius: 30px; 
                    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
-        
             <h1>TOXBASE</h1>
             <h4>A Bioscient Enterprise application.</h4>
             <br>
             <a class="btn btn-light btn-lg" type="button" href="{{url_for('toxins_finder')}}">Get started</a>
         </div>
     </div>
-    
-
 </body>
 
 {% endblock %}

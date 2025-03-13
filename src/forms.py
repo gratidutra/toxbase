@@ -1,7 +1,7 @@
 import os
 
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, StringField, SubmitField
+from wtforms import PasswordField, StringField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
 
 from src.models import Users
@@ -39,6 +39,8 @@ class RegisterForm(FlaskForm):
     password_conf = PasswordField(
         label="Confirmation Password", validators=[EqualTo("password"), DataRequired()]
     )
+    role = SelectField('Role', choices=[('user', 'User'), ('admin', 'Admin')], 
+                       validators=[DataRequired()])
     submit = SubmitField(label="Submit")
 
 
