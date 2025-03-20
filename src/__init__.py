@@ -24,6 +24,12 @@ app.config["SQLALCHEMY_DATABASE_URI"] = (
     f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"
     f"@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 )
+
+app.config["SQLALCHEMY_POOL_SIZE"] = 10  # Número máximo de conexões no pool
+app.config["SQLALCHEMY_POOL_TIMEOUT"] = 1800  # Tempo máximo de espera por uma conexão (em segundos)
+app.config["SQLALCHEMY_POOL_RECYCLE"] = 5000  # Reciclar conexões após 30 minutos (1800 segundos)
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
 # Inicializar extensões com o app

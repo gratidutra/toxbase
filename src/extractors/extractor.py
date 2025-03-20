@@ -1,186 +1,97 @@
 # import chromedriver_autoinstaller
-import logging
-import os
 import time
 import xml.etree.ElementTree as ET
+import logging
 
 import pandas as pd
 import requests
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.firefox.options import Options as Options_f
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.firefox.options import Options as Options_f
+from selenium.webdriver.chrome.options import Options
+from flask import jsonify
 
-logging.basicConfig(level=logging.DEBUG)
+import os
 
-
-def fetch_toxin_xml(toxin_id):
-    """
-    Fetch XML data for a given toxin ID from the T3DB database.
-    """
-
-    base_url = f"http://www.t3db.ca/toxins/{toxin_id}.xml"
-    try:
-        response = requests.get(base_url)
-        response.raise_for_status()  # Ensure the request was successful
-        return response.text
-    except requests.RequestException as e:
-        print(f"Error fetching toxin XML for ID {toxin_id}: {e}")
-        return None
-
-
-def parse_xml_to_table(xml_content):
-    """
-    Parse XML content into a pandas DataFrame with one row of data.
-    """
-    try:
-        root = ET.fromstring(xml_content)
-        data = {}
-
-        # Extract key-value pairs from the XML structure
-        for element in root:
-            data[element.tag] = element.text
-
-        # Convert the dictionary to a DataFrame
-        return pd.DataFrame([data])
-    except ET.ParseError as e:
-        print(f"Error parsing XML: {e}")
-        return pd.DataFrame()  # Return an empty DataFrame on parse failure
-
-
-def t3db_extractor(cas_numbers, delay=1):
-    """
-    Process a list of toxin IDs and fetch their data with a delay between requests.
-
-    Args:
-        cas_number (list): List of toxin IDs to process.
-        delay (int or float): Time in seconds to wait between requests.
-
-    Returns:
-        pd.DataFrame: A DataFrame with the combined toxin data.
-    """
-    all_toxins = []  # Lista para armazenar os resultados
-
-    # Carrega os dados do CSV
-    toxins_data = pd.read_csv("data/toxins_id.csv")
-
-    # Converte 'cas_number' para string (para garantir que a comparação funcione corretamente)
-    toxins_data["cas_number"] = toxins_data["cas_number"].astype(str)
-
-    # Itera sobre a lista de cas_numbers
-    for cas_number in cas_numbers:
-        toxin_id_ = toxins_data.query(f"cas_number == '{cas_number}'")[["toxin_id"]]
-        # print(toxin_id_.loc[0, 'toxin_id'])
-        xml_content = fetch_toxin_xml(toxin_id_.loc[0, "toxin_id"])
-        if xml_content:  # Check if valid XML was fetched
-            df_toxin = parse_xml_to_table(xml_content)
-            all_toxins.append(df_toxin)
-
-        # Delay between requests
-        time.sleep(delay)
-
-    # Concatenate all DataFrames, if available
-    if all_toxins:
-        return pd.concat(all_toxins, ignore_index=True)
-    else:
-        return pd.DataFrame()  # Return an em
-
+import json
+import pandas as pd
+import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options as Options_f
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 def pubchem_extractor(cas_numbers):
-
     if isinstance(cas_numbers, str):
         cas_numbers = [cas_numbers]
 
-    pubchem_data = pd.DataFrame()
+    extracted_data = []  # Lista para armazenar os dados extraídos
 
     # Definir as opções do Firefox
-    options = Options()
+    options = Options_f()
     options.add_argument("--headless")  # Rodar sem interface gráfica
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
     for cas_number in cas_numbers:
-        # Initialize the WebDriver with the options
         driver = webdriver.Remote(
             command_executor="http://selenoid:4444/wd/hub", options=options
         )
         try:
-            # Inicializar o navegador
-
             # Acessar a página do PubChem
             url = "https://pubchem.ncbi.nlm.nih.gov/"
             driver.get(url)
-
             time.sleep(3)
 
             # Inserir o número CAS na barra de pesquisa
             search = driver.find_element(
                 By.XPATH,
-                "/html/body/div[1]/div/div/main/div[1]/div/div[2]/div/div[2]/form/div/div[1]/input",
+                "/html/body/div[1]/div/div/main/div[1]/div/div[2]/div/div[2]/form/div/div[1]/input"
             )
             search.send_keys(cas_number)
             search.send_keys(Keys.RETURN)
 
             # Aguardar até que o elemento clicável esteja disponível
-            WebDriverWait(driver, 10).until(
+            WebDriverWait(driver, 45).until(
                 EC.element_to_be_clickable(
                     (
                         By.XPATH,
-                        "/html/body/div[1]/div/div/main/div[2]/div[1]/div/div[2]/div/div[1]/div[2]/div[1]/a/span/span",
+                        "/html/body/div[1]/div/div/main/div[2]/div[2]/div[3]/div/div/div/div[2]/ul/li/div/div/div[1]/div[2]/div[1]/a/span/span"
                     )
                 )
             ).click()
 
             # Esperar para carregar os detalhes
-            time.sleep(5)
+            time.sleep(10)
+
+            # Função auxiliar para buscar um elemento de forma segura
+            def get_text_or_default(xpath, default="Não encontrado"):
+                elements = driver.find_elements(By.XPATH, xpath)
+                return elements[0].text if elements else default
 
             # Extração dos dados
-            cid = driver.find_element(
-                By.XPATH, '//div[text()="PubChem CID"]/following-sibling::div'
-            ).text
-            molecular_formula = driver.find_element(
-                By.XPATH, '//div[text()="Molecular Formula"]/following-sibling::div'
-            ).text
-            synonyms = driver.find_element(
-                By.XPATH, '//div[text()="Synonyms"]/following-sibling::div'
-            ).text
-            molecular_weight = driver.find_element(
-                By.XPATH, '//div[text()="Molecular Weight"]/following-sibling::div'
-            ).text
-            dates = driver.find_element(
-                By.XPATH, '//div[text()="Dates"]/following-sibling::div'
-            ).text
-            description = driver.find_element(
-                By.XPATH, '//div[text()="Description"]/following-sibling::div'
-            ).text
-
-            # Criar um dicionário com os dados extraídos
-            dict_data = {
-                "CAS Number": [cas_number],
-                "CID": [cid],
-                "Fórmula Molecular": [molecular_formula],
-                "Sinônimos": [synonyms],
-                "Peso Molecular": [molecular_weight],
-                "Datas": [dates],
-                "Descrição": [description],
-            }
-
-            # Criar um DataFrame e adicionar ao DataFrame final
-            data = pd.DataFrame(dict_data)
-            pubchem_data = pd.concat([pubchem_data, data], ignore_index=True)
+            extracted_data.append({
+                "CAS Number": cas_number,
+                "CID": get_text_or_default('//div[text()="PubChem CID"]/following-sibling::div'),
+                "Fórmula Molecular": get_text_or_default('//div[text()="Molecular Formula"]/following-sibling::div'),
+                "Sinônimos": get_text_or_default('//div[text()="Synonyms"]/following-sibling::div'),
+                "Peso Molecular": get_text_or_default('//div[text()="Molecular Weight"]/following-sibling::div'),
+                "Datas": get_text_or_default('//div[text()="Dates"]/following-sibling::div'),
+                "Descrição": get_text_or_default('//div[text()="Description"]/following-sibling::div')
+            })
 
         except Exception as e:
             print(f"Erro ao processar o CAS Number {cas_number}: {e}")
         finally:
-            # Fechar o navegador
             driver.quit()
 
-    return pubchem_data
-
+    return extracted_data
 
 def echa_extractor(cas_numbers):
     # Certificar-se de que cas_numbers é uma lista
@@ -218,7 +129,6 @@ def echa_extractor(cas_numbers):
                 )
             )
             cookie_button.click()
-            print("Cookies aceitos")
             time.sleep(2)
 
             # Selecionar checkbox
@@ -231,16 +141,12 @@ def echa_extractor(cas_numbers):
                 )
             )
             actions.move_to_element(checkbox).click().perform()
-            print("Checkbox selecionado")
             time.sleep(2)
 
             # Inserir o número CAS na barra de pesquisa
-            search = driver.find_element(
-                By.XPATH, '//*[@id="autocompleteKeywordInput"]'
-            )
+            search = driver.find_element(By.XPATH, '//*[@id="autocompleteKeywordInput"]')
             search.send_keys(cas_number)
             search.send_keys(Keys.RETURN)
-            print("Número CAS inserido e pesquisa realizada")
             time.sleep(2)
 
             # Aguardar até que o elemento esteja visível e clicável
@@ -253,70 +159,135 @@ def echa_extractor(cas_numbers):
                 )
             )
             element.click()
-            print("Elemento clicado")
+            time.sleep(3)
+
+              # Verificar se o botão "Registered" está habilitado
+            try:
+                registered_button = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="_disssubsinfo_WAR_disssubsinfoportlet_dataset-reg-button"]/span')))
+                if not registered_button.is_enabled():
+                    print(f"Botão 'Registered' desabilitado para o CAS {cas_number}.")
+                    continue  # Cenário 3: Botão desabilitado
+            except:
+                print(f"Botão 'Registered' não encontrado para o CAS {cas_number}.")
+                continue
+
+            # Se o botão "Registered" está habilitado, verificar se abre uma nova aba
+            registered_button.click()
             time.sleep(2)
 
-            # Extração de informações específicas
-            ec = driver.find_element(
-                By.XPATH,
-                '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[1]',
-            ).text
-            cas = driver.find_element(
-                By.XPATH,
-                '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[3]',
-            ).text
-            molecular_formula = driver.find_element(
-                By.XPATH,
-                '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[1]/div/div/div/p[3]',
-            ).text
-            haz_classification_labelling = driver.find_element(
-                By.XPATH,
-                '//*[@id="infocardContainer"]/div/div[1]/div/div[1]/div/div[2]/div/div/div/p',
-            ).text
-            about_1 = driver.find_element(
-                By.XPATH, '//*[@id="aboutSubstanceParagraphWrapper"]/p[1]'
-            ).text
-            about_2 = driver.find_element(
-                By.XPATH, '//*[@id="aboutSubstanceParagraphWrapper"]/p[2]'
-            ).text
-            consumer_user = driver.find_element(
-                By.XPATH, '//*[@id="aboutSubstanceParagraphWrapper"]/p[3]'
-            ).text
+            # Verificar se uma nova aba foi aberta
+            tabs = driver.window_handles
+            if len(tabs) > 1:
+                # Cenário 2: Nova aba aberta
+                driver.switch_to.window(tabs[1])
 
-            # Criar um dicionário com os dados extraídos
-            dict_data = {
-                "CAS Number": [cas],
-                "EC": [ec],
-                "Fórmula Molecular": [molecular_formula],
-                "HAZ Classificação": [haz_classification_labelling],
-                "Sobre 1": [about_1],
-                "Sobre 2": [about_2],
-                "Uso Consumidor": [consumer_user],
-            }
+                registered_button = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="_dissregisteredsubstances_WAR_dissregsubsportlet_disregOutputitemVOsSearchContainerSearchContainer"]/table/tbody/tr[1]/td[9]/a')))
+                registered_button.click()
+              
+                    # Espera um pouco para a nova aba carregar (ou use WebDriverWait)
+                time.sleep(2)
+                    
+                    # Alterna para a nova aba
+                driver.switch_to.window(driver.window_handles[1])
+                    
+                # Capturar a URL da nova aba
+                url_new_tab = driver.current_url
+                print(f"URL da nova aba para o CAS {cas_number}: {url_new_tab}")
 
-            data = pd.DataFrame(dict_data)
-            echa_data = pd.concat([echa_data, data], ignore_index=True)
-            print(f"Dados extraídos para o CAS Number: {cas_number}")
+                if len(driver.window_handles) > 1:
+                    for handle in driver.window_handles[:-1]:
+                        driver.switch_to.window(handle)
+                        driver.close()
+                
+                    # Alterna para a aba mais recente
+                    driver.switch_to.window(driver.window_handles[0])
+
+            else:
+                # Cenário 1: Não abre nova aba
+                url_current_page = driver.current_url
+                print(f"URL da página de interesse para o CAS {cas_number}: {url_current_page}")
+
+
+            nav_button = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="MainNav7"]/a')))
+            nav_button.click()
+
+            element = driver.find_element(By.XPATH, '//*[@id="SubNav7_1"]/a')
+            driver.execute_script("arguments[0].click();", element)
+    
+            # XPath base
+            xpath_base = '//*[@id="MainContent"]'
+            
+            # Encontrar elementos dentro da hierarquia do XPath base
+            main_div = driver.find_element(By.XPATH, f"{xpath_base}//*")
+                        
+            # Encontra todas as seções <h3> dentro de main-content
+            secoes_h3 = main_div.find_elements(By.TAG_NAME, "h3")
+        
+            # Lista para armazenar os dados organizados
+            todas_secoes = []
+        
+            for secao_h3 in secoes_h3:
+                secao_nome = secao_h3.text.strip()
+                secao_dict = {"seção": secao_nome, "subseções": []}
+        
+                # Pegar todos os <h4> que aparecem depois desse <h3> e antes do próximo <h3>
+                subsecoes_h4 = secao_h3.find_elements(By.XPATH, "./following-sibling::h4")
+        
+                for subsecao_h4 in subsecoes_h4:
+                    subsecao_nome = subsecao_h4.text.strip()
+                    subsecao_dict = {"subseção": subsecao_nome, "dados": {}}
+        
+                    # Pegar todos os <h5> que aparecem depois desse <h4> e antes do próximo <h4> ou <h3>
+                    subsecoes_h5 = subsecao_h4.find_elements(By.XPATH, "./following-sibling::h5")
+        
+                    for subsecao_h5 in subsecoes_h5:
+                        subsubsecao_nome = subsecao_h5.text.strip()
+                        dados_dict = {"dados_textuais": []}
+        
+                        # Encontrar <dt> e <dd> dentro da mesma subseção
+                        elementos_dt = subsecao_h5.find_elements(By.XPATH, "./following-sibling::dl/dt")
+                        elementos_dd = subsecao_h5.find_elements(By.XPATH, "./following-sibling::dl/dd")
+        
+                        for dt, dd in zip(elementos_dt, elementos_dd):
+                            chave = dt.text.strip()
+                            valor = dd.text.strip()
+                            dados_dict[chave] = valor
+        
+                        # Capturar parágrafos <p> dentro da subseção
+                        paragrafos = subsecao_h5.find_elements(By.XPATH, "./following-sibling::p")
+                        for p in paragrafos:
+                            texto_p = p.text.strip()
+                            if texto_p:  # Evita adicionar parágrafos vazios
+                                dados_dict["dados_textuais"].append(texto_p)
+        
+                        subsecao_dict["dados"][subsubsecao_nome] = dados_dict
+        
+                    secao_dict["subseções"].append(subsecao_dict)
+        
+                todas_secoes.append(secao_dict)
+        
+            # Converte para JSON formatado
+            json_resultado = json.dumps(todas_secoes, indent=4, ensure_ascii=False)
+        
+            print(json_resultado)
 
         except Exception as e:
             print(f"Erro ao processar o CAS Number {cas_number}: {e}")
         finally:
             # Fechar o navegador
             driver.quit()
-            print("WebDriver fechado")
 
-    return echa_data
-
+    return json_resultado
 
 def extract_data(cas_numbers, databases):
     """
     Recebe os CAS Numbers e os bancos de dados selecionados,
-    e chama as funções corretas para extração, retornando DataFrames.
+    e chama as funções corretas para extração, retornando um dicionário.
     """
     cas_list = [cas.strip() for cas in cas_numbers.split(",") if cas.strip()]
 
     if not cas_list:
-        return {}
+        return {"error": "Nenhum CAS Number válido fornecido."}
 
     results = {}
 
@@ -324,9 +295,9 @@ def extract_data(cas_numbers, databases):
         results[cas] = {}
 
         if "PubChem" in databases:
-            results[cas]["PubChem"] = pubchem_extractor(cas)
+            results[cas]["PubChem"] = pubchem_extractor(cas)  # Retorna um dicionário
 
         if "ECHA" in databases:
-            results[cas]["ECHA"] = echa_extractor(cas)
+            results[cas]["ECHA"] = echa_extractor(cas)  # Retorna um dicionário
 
     return results

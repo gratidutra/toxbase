@@ -44,11 +44,12 @@ def admin_area():
     form = RegisterForm()
     if form.validate_on_submit():
         user = Users(
-            name=form.name.data, email=form.email.data, password_cryp=form.password.data
+            name=form.name.data, email=form.email.data, password_cryp=form.password.data, 
+            role=form.role.data
         )
         db.session.add(user)
         db.session.commit()
-        return redirect(url_for("admin"))
+        return redirect(url_for("admin_area"))
     if form.errors != {}:
         for err in form.errors.values():
             flash(f"Error user register {err}", category="danger")
@@ -86,7 +87,7 @@ def delete_user(user_id):
 
 
 @app.route("/toxins_finder", methods=["GET", "POST"])
-@login_required
+#@login_required
 def toxins_finder():
     results = None
 
@@ -97,78 +98,18 @@ def toxins_finder():
         if not cas_numbers:
             flash("Por favor, insira um número CAS.", "danger")
         else:
-            df_results = extract_data(cas_numbers, databases)
+            extracted_data = extract_data(cas_numbers, databases)
 
-            # Conectar ao banco de dados
-            conn, cursor = connection_db()
-            if conn is None or cursor is None:
-                flash("Erro ao conectar ao banco de dados.", "danger")
-                return render_template("index.html", results=None)
-
-            try:
-                for cas, dbs in df_results.items():
-                    for db_name, data in dbs.items():
-                        if db_name == "PubChem":
-                            for _, row in data.iterrows():
-                                cursor.execute(
-                                    """
-                                    INSERT INTO pubchem (cas_number, cit, molecular_formula, 
-                                                         synonyms, molecular_weight, dates, 
-                                                         description, created_date, updated_date)
-                                    VALUES (%s, %s, %s, %s, %s, %s,%s, NOW(), NOW())
-                                    """,
-                                    (
-                                        row["CAS Number"],
-                                        row["CID"],
-                                        row["Fórmula Molecular"],
-                                        row["Sinônimos"],
-                                        row["Peso Molecular"],
-                                        row["Datas"],
-                                        row["Descrição"],
-                                    ),
-                                )
-
-                        elif db_name == "ECHA":
-                            for _, row in data.iterrows():
-                                cursor.execute(
-                                    """
-                                    INSERT INTO echa (cas_number, ec, molecular_formula, 
-                                                      haz_classification, about_1, 
-                                                      about_2, consumer_user, created_date, updated_date)
-                                    VALUES (%s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
-                                    """,
-                                    (
-                                        row["CAS Number"],
-                                        row["EC"],
-                                        row["Fórmula Molecular"],
-                                        row["HAZ Classificação"],
-                                        row["Sobre 1"],
-                                        row["Sobre 2"],
-                                        row["Uso Consumidor"],
-                                    ),
-                                )
-
-                conn.commit()
-                flash("Dados armazenados com sucesso!", "success")
-
-            except Exception as e:
-                conn.rollback()
-                flash(f"Erro ao salvar no banco de dados: {e}", "danger")
-
-            finally:
-                cursor.close()
-                conn.close()
-
+            # Converte os dados para um formato JSON serializável
             results = {
-                cas: {
-                    db_name: data.to_html(classes="table table-striped")
-                    for db_name, data in dbs.items()
-                }
-                for cas, dbs in df_results.items()
+                cas: {db: data for db, data in dbs.items()}
+                for cas, dbs in extracted_data.items()
             }
 
-    return render_template("toxins_finder.html", results=results)
+            if not results:
+                flash("Nenhum dado encontrado para os CAS Numbers fornecidos.", "warning")
 
+    return render_template("toxins_finder.html", results=results)
 
 @app.route("/admin")
 @admin_required

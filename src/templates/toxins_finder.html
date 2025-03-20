@@ -8,16 +8,7 @@ Toxins Finder
     <div class="container mt-5">
         <h2 class="mb-4">Consulta de Toxinas</h2>
 
-        <!-- Exibir mensagens -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <form method="POST">
+         <form method="POST">
             <!-- Campo de entrada para CAS Numbers -->
             <div class="mb-3">
                 <label for="cas_numbers" class="form-label">Enter CAS Number (comma-separated):</label>
@@ -45,29 +36,27 @@ Toxins Finder
     <h3 class="mt-5">Results</h3>
     {% for cas, databases in results.items() %}
         <h4 class="mt-3">CAS Number: {{ cas }}</h4>
-        <ul class="nav nav-tabs" id="dbTabs-{{ cas }}" role="tablist">
-            {% for db, table in databases.items() %}
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link {% if loop.first %}active{% endif %}" id="{{ cas }}-{{ db }}-tab" data-bs-toggle="tab" data-bs-target="#{{ cas }}-{{ db }}" type="button" role="tab">
-                        {{ db }} Data
-                    </button>
-                </li>
-            {% endfor %}
-        </ul>
-        <div class="tab-content mt-3" id="dbTabsContent-{{ cas }}">
-            {% for db, table in databases.items() %}
-                <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="{{ cas }}-{{ db }}" role="tabpanel">
-                    {{ table|safe }}
+        
+        <!-- Accordion para selecionar o banco de dados -->
+        <div class="accordion" id="accordion-{{ cas }}">
+            {% for db, data in databases.items() %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading-{{ cas }}-{{ db }}">
+                        <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ cas }}-{{ db }}" aria-expanded="{% if loop.first %}true{% else %}false{% endif %}" aria-controls="collapse-{{ cas }}-{{ db }}">
+                            {{ db }} Data
+                        </button>
+                    </h2>
+                    <div id="collapse-{{ cas }}-{{ db }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" aria-labelledby="heading-{{ cas }}-{{ db }}" data-bs-parent="#accordion-{{ cas }}">
+                        <div class="accordion-body">
+                            <pre>{{ data | tojson(indent=4) | safe }}</pre>
+                        </div>
+                    </div>
                 </div>
             {% endfor %}
         </div>
     {% endfor %}
 {% endif %}
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
 </body>
 </html>
 {% endblock %}
