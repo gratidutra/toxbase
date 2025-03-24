@@ -7,7 +7,9 @@ networks:
 
 services:
   flask_app:
-    build: .
+    build:
+      context: .  # Usa o diretório atual como contexto de build
+      dockerfile: Dockerfile
     container_name: flask_app
     ports:
       - "5000:5000"
@@ -21,7 +23,8 @@ services:
       - selenoid
     networks:
       - selenoid
-    command: ["python", "app.py"]
+    command: bash /home/toxbase/run_webserver.sh
+
 
   selenoid:
     image: aerokube/selenoid:latest-release

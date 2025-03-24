@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}
+Form Register
+{% endblock %}
+{% block content %}
+
+<body class="text-center">
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Seção de tabela de usuários -->
+            <div class="col-md-6">
+                <h2 class="h3 mb-3 font-weight-normal">Registered Users</h2>
+                <table class="table table-striped table-bordered">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>{{ user.name }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.role }}</td>
+                                <td>
+                                    <a href="{{ url_for('edit_user', user_id=user.id) }}" class="btn btn-primary btn-sm">Edit</a>
+                                    <a href="{{ url_for('delete_user', user_id=user.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Seção de formulário de cadastro -->
+            <div class="col-md-6">
+                <h1 class="h3 mb-3 font-weight-normal">Register New User</h1>
+                <form method="POST" class="form-register bg-light p-4 rounded shadow-sm">
+                    {{ form.hidden_tag() }}
+
+                    <!-- Username -->
+                    <div class="form-group mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control", placeholder="User name") }}
+                    </div>
+
+                    <!-- E-mail -->
+                    <div class="form-group mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control", placeholder="E-mail") }}
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-group mb-3">
+                        {{ form.password.label(class="form-label") }}
+                        {{ form.password(class="form-control", placeholder="Password") }}
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="form-group mb-3">
+                        {{ form.password_conf.label(class="form-label") }}
+                        {{ form.password_conf(class="form-control", placeholder="Confirm password") }}
+                    </div>
+
+                    <!-- Role (User or Admin) -->
+                    <div class="form-group mb-3">
+                        {{ form.role.label(class="form-label") }}
+                        {{ form.role(class="form-control") }}
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid mb-3">
+                        {{ form.submit(class="btn btn-lg btn-success") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+<style>
+    .table {
+        background-color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    .table th, .table td {
+        background-color: rgba(255, 255, 255, 0.5) !important;
+    }
+</style>
+
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}
+Login
+{% endblock %}
+{% block content %}
+
+<body class="text-center">
+    <div class="d-flex justify-content-center align-items-center vh-100">
+        <div class="d-flex justify-content-between align-items-center text-center p-5" 
+            style="width: 100%; max-width: 1200px; height: 100%;">
+
+            <!-- Div para a imagem -->
+            <div class="d-flex justify-content-center align-items-center" style="width: 50%;">
+                <img src="https://i.imgur.com/nskE1a3.png" height="600">
+            </div>
+
+            <!-- Div para o formulário -->
+            <div class="flex-column justify-content-center align-items-center" style="width: 70%;">
+                <form method="POST" class="form-signin" style="color:whitesmoke">
+                    {{ form.hidden_tag() }}
+
+                    <!-- Campo de Email -->
+                    <div class="form-group mb-3">
+                        {{ form.email.label(class="h5 mb-2") }} <!-- Diminui a fonte da label -->
+                        {{ form.email(class='form-control', placeholder="Your E-mail") }} <!-- Aumenta a largura do campo -->
+                    </div>
+
+                    <!-- Campo de Senha -->
+                    <div class="mb-4">
+                        {{ form.password.label(class="h5 mb-2") }} <!-- Diminui a fonte da label -->
+                        {{ form.password(class='form-control', placeholder='Your password') }} <!-- Aumenta a largura do campo -->
+                    </div>
+
+                    <!-- Botão de Submit -->
+                    <div class="d-grid mb-4">
+                        {{ form.submit(class="btn btn-lg btn-primary") }}
+                    </div>
+
+                    <!-- Link "Forgot Password?" -->
+                    <div class="Checkbox">
+                        <a href="{{url_for('recovery_passwordForm')}}" style="color: #ffcc00; text-decoration: none;">
+                            <h5>Forgot Password?</h5>
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</body>
+{% endblock %}
