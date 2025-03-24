@@ -11,11 +11,11 @@ app.secret_key = os.getenv("SECRET_KEY")  # Para mensagens flash no Flask
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    results = None  
+    results = None
 
     if request.method == "POST":
         cas_numbers = request.form.get("cas_numbers")
-        databases = request.form.getlist("databases")  
+        databases = request.form.getlist("databases")
 
         if not cas_numbers:
             flash("Por favor, insira um número CAS.", "danger")
@@ -35,13 +35,13 @@ def index():
                             for _, row in data.iterrows():
                                 cursor.execute(
                                     """
-                                    INSERT INTO pubchem (cas_number, cid, molecular_formula, 
-                                                         synonyms, molecular_weight, dates, 
+                                    INSERT INTO pubchem (cas_number, cid, molecular_formula,
+                                                         synonyms, molecular_weight, dates,
                                                          description, created_date, updated_date)
                                     VALUES (%s, %s, %s, %s, %s, %s,%s, NOW(), NOW())
                                     """,
-                                    (row['CAS Number'], row['CID'], row['Fórmula Molecular'], 
-                                     row['Sinônimos'], row['Peso Molecular'], row['Datas'], 
+                                    (row['CAS Number'], row['CID'], row['Fórmula Molecular'],
+                                     row['Sinônimos'], row['Peso Molecular'], row['Datas'],
                                      row['Descrição'])
                                 )
 
@@ -49,13 +49,13 @@ def index():
                             for _, row in data.iterrows():
                                 cursor.execute(
                                     """
-                                    INSERT INTO echa (cas_number, ec, molecular_formula, 
-                                                      haz_classification, about_1, 
+                                    INSERT INTO echa (cas_number, ec, molecular_formula,
+                                                      haz_classification, about_1,
                                                       about_2, consumer_user, created_date, updated_date)
                                     VALUES (%s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
                                     """,
-                                    (row['CAS Number'], row['EC'], row['Fórmula Molecular'], 
-                                     row['HAZ Classificação'], row['Sobre 1'], row['Sobre 2'], 
+                                    (row['CAS Number'], row['EC'], row['Fórmula Molecular'],
+                                     row['HAZ Classificação'], row['Sobre 1'], row['Sobre 2'],
                                      row['Uso Consumidor'])
                                 )
 

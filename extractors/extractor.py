@@ -3,7 +3,6 @@ import time
 import xml.etree.ElementTree as ET
 import logging
 
-
 import pandas as pd
 import requests
 from selenium import webdriver
@@ -16,9 +15,6 @@ from selenium.webdriver.firefox.options import Options as Options_f
 from selenium.webdriver.chrome.options import Options
 
 import os
-
-logging.basicConfig(level=logging.DEBUG)
-
 
 def pubchem_extractor(cas_numbers):
 
@@ -38,29 +34,27 @@ def pubchem_extractor(cas_numbers):
         driver = webdriver.Remote(
             command_executor="http://selenoid:4444/wd/hub", options=options
         )
-       try:
-            # Inicializar o navegador
-
-            # Acessar a página do PubChem
+        try:
+ 	    # Acessar a página do PubChem
             url = "https://pubchem.ncbi.nlm.nih.gov/"
             driver.get(url)
 
-            time.sleep(5)
+            time.sleep(3)
 
             # Inserir o número CAS na barra de pesquisa
             search = driver.find_element(
                 By.XPATH,
-                "/html/body/div[1]/div/div/main/div[1]/div/div[2]/div/div[2]/form/div/div[1]/input",
+                "/html/body/div[1]/div/div/main/div[1]/div/div[2]/div/div[2]/form/div/div[1]/input"
             )
             search.send_keys(cas_number)
             search.send_keys(Keys.RETURN)
 
              # Aguardar até que o elemento clicável esteja disponível
-            WebDriverWait(driver, 17).until(
+            WebDriverWait(driver, 45).until(
                 EC.element_to_be_clickable(
                     (
                         By.XPATH,
-                        "/html/body/div[1]/div/div/main/div[2]/div[1]/div/div[2]/div/div[1]/div[2]/div[1]/a/span/span",
+                        "/html/body/div[1]/div/div/main/div[2]/div[2]/div[3]/div/div/div/div[2]/ul/li/div/div/div[1]/div[2]/div[1]/a/span/span"
                     )
                 )
             ).click()
@@ -105,7 +99,6 @@ def pubchem_extractor(cas_numbers):
 
     return pubchem_data
 
-
 def echa_extractor(cas_numbers):
     # Certificar-se de que cas_numbers é uma lista
     if isinstance(cas_numbers, str):
@@ -142,7 +135,6 @@ def echa_extractor(cas_numbers):
                 )
             )
             cookie_button.click()
-            print('Cookies aceitos')
             time.sleep(2)
 
             # Selecionar checkbox
@@ -155,14 +147,12 @@ def echa_extractor(cas_numbers):
                 )
             )
             actions.move_to_element(checkbox).click().perform()
-            print("Checkbox selecionado")
             time.sleep(2)
 
             # Inserir o número CAS na barra de pesquisa
             search = driver.find_element(By.XPATH, '//*[@id="autocompleteKeywordInput"]')
             search.send_keys(cas_number)
             search.send_keys(Keys.RETURN)
-            print("Número CAS inserido e pesquisa realizada")
             time.sleep(2)
 
             # Aguardar até que o elemento esteja visível e clicável
@@ -175,10 +165,9 @@ def echa_extractor(cas_numbers):
                 )
             )
             element.click()
-            print("Elemento clicado")
-            time.sleep(2)
+            time.sleep(3)
 
-              # Função auxiliar para buscar um elemento de forma segura
+               # Função auxiliar para buscar um elemento de forma segura
             def get_text_or_default(xpath, default="Não encontrado"):
                 elements = driver.find_elements(By.XPATH, xpath)
                 return elements[0].text if elements else default
