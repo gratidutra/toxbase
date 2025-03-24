@@ -10,8 +10,9 @@ from src import app, bcrypt, db
 from src.database import connection_db
 from src.extractors.extractor import extract_data
 from src.forms import LoginForm, RecoveryPassword, RecoveryPasswordForm, RegisterForm
-from src.models import TokensPassword, Users
+from src.models import TokensPassword, Users, PubChem, Echa
 from src.decorators import admin_required  # Importando o decorador
+import time
 
 load_dotenv()
 
@@ -87,35 +88,94 @@ def delete_user(user_id):
 
 
 @app.route("/toxins_finder", methods=["GET", "POST"])
-#@login_required
+@login_required
 def toxins_finder():
-    results = None
-
+    results = None  
+    start = time.time()
     if request.method == "POST":
         cas_numbers = request.form.get("cas_numbers")
-        databases = request.form.getlist("databases")
+        databases = request.form.getlist("databases")  
 
         if not cas_numbers:
             flash("Por favor, insira um número CAS.", "danger")
         else:
-            extracted_data = extract_data(cas_numbers, databases)
+            df_results = extract_data(cas_numbers, databases)
 
-            # Converte os dados para um formato JSON serializável
-            results = {
-                cas: {db: data for db, data in dbs.items()}
-                for cas, dbs in extracted_data.items()
-            }
+            # Conectar ao banco de dados
+            conn, cursor = connection_db()
+            if conn is None or cursor is None:
+                flash("Erro ao conectar ao banco de dados.", "danger")
+                return render_template("index.html", results=None)
 
-            if not results:
-                flash("Nenhum dado encontrado para os CAS Numbers fornecidos.", "warning")
+            try:
+                for cas, dbs in df_results.items():
+                    for db_name, data in dbs.items():
+                        if db_name == "PubChem":
+                            for _, row in data.iterrows():
+                                cursor.execute(
+                                    """
+                                    INSERT INTO pubchem (cas_number, cid, molecular_formula, 
+                                                         synonyms, molecular_weight, dates, 
+                                                         description, created_date, updated_date)
+                                    VALUES (%s, %s, %s, %s, %s, %s,%s, NOW(), NOW())
+                                    """,
+                                    (row['CAS Number'], row['CID'], row['Fórmula Molecular'], 
+                                     row['Sinônimos'], row['Peso Molecular'], row['Datas'], 
+                                     row['Descrição'])
+                                )
+
+                        elif db_name == "ECHA":
+                            for _, row in data.iterrows():
+                                cursor.execute(
+                                    """
+                                    INSERT INTO echa (cas_number, ec, molecular_formula, 
+                                                      haz_classification, about_1, 
+                                                      about_2, consumer_user, created_date, updated_date)
+                                    VALUES (%s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
+                                    """,
+                                    (row['CAS Number'], row['EC'], row['Fórmula Molecular'], 
+                                     row['HAZ Classificação'], row['Sobre 1'], row['Sobre 2'], 
+                                     row['Uso Consumidor'])
+                                )
+
+                conn.commit()
+                end = time.time()
+                flash(f"Dados armazenados com sucesso! {end-start:.4f} ", "success")
+
+            except Exception as e:
+                conn.rollback()
+                flash(f"Erro ao salvar no banco de dados: {e}", "danger")
+
+            finally:
+                cursor.close()
+                conn.close()
+
+            results = {cas: {db_name: data.to_html(classes='table table-striped') for db_name, data in dbs.items()} for cas, dbs in df_results.items()}
 
     return render_template("toxins_finder.html", results=results)
 
-@app.route("/admin")
-@admin_required
+@app.route("/user_area/")
 @login_required
-def admin_dashboard():
-    return render_template("admin.html")
+def user_area():
+    #mudar a lógica do banco, deixar o resultado em uma coluna results em json
+    # ver que ta dando erro no nome do BD
+    pubchem = PubChem.query.order_by(PubChem.created_date.desc()).all()
+    echa = Echa.query.order_by(Echa.created_date.desc()).all()
+    return render_template("user_area.html", pubchem=pubchem, echa=echa)
+
+@app.route("/delete_record/<id>", methods=["POST"])
+@login_required
+def delete_record(id):
+    pubchem = PubChem.query.filter_by(celery_id=id).first()
+    echa = Echa.query.filter_by(celery_id=id).first()
+    if pubchem and current_user.id == pubchem.user_id:
+        db.session.delete(pubchem)
+    if echa and current_user.id == echa.user_id:
+        db.session.delete(echa)
+
+    db.session.commit()
+    return redirect(url_for("user_area"))
+
 
 @app.route("/recovery_password_form", methods=["GET", "POST"])
 def recovery_passwordForm():

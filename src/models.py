@@ -38,6 +38,7 @@ class Users(db.Model, UserMixin):
 
 
 class PubChem(db.Model):
+    __tablename__ = "pubchem" 
     id = db.Column(db.Integer, primary_key=True)
     cas_number = db.Column(db.String(40), nullable=False)
     cid = db.Column(db.String(40))
@@ -53,6 +54,7 @@ class PubChem(db.Model):
 
 
 class Echa(db.Model):
+    __tablename__ = "echa" 
     id = db.Column(db.Integer, primary_key=True)
     cas_number = db.Column(db.String(40), nullable=False)
     ec = db.Column(db.String(40))

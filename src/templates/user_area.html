@@ -1,0 +1,119 @@
+<style>
+    .table-container {
+        background-color: white !important;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">User Area</h2>
+
+    <!-- Abas para os bancos de dados -->
+    <ul class="nav nav-tabs" id="databaseTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="pubchem-tab" data-bs-toggle="tab" data-bs-target="#pubchem" type="button" role="tab" aria-controls="pubchem" aria-selected="true">
+                PubChem
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="echa-tab" data-bs-toggle="tab" data-bs-target="#echa" type="button" role="tab" aria-controls="echa" aria-selected="false">
+                ECHA
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content mt-3">
+        <!-- Aba PubChem -->
+        <div class="tab-pane fade show active" id="pubchem" role="tabpanel" aria-labelledby="pubchem-tab">
+            <h4 class="mb-3">PubChem Results</h4>
+            <div class="table-responsive table-container">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">CAS Number</th>
+                            <th scope="col">CID</th>
+                            <th scope="col">Molecular Formula</th>
+                            <th scope="col">Synonyms</th>
+                            <th scope="col">Molecular Weight</th>
+                            <th scope="col">Dates</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Created Date</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in pubchem[::-1] %}
+                        <tr>
+                            <td>{{ result.cas_number }}</td>
+                            <td>{{ result.cid }}</td>
+                            <td>{{ result.molecular_formula }}</td>
+                            <td>{{ result.synonyms }}</td>
+                            <td>{{ result.molecular_weight }}</td>
+                            <td>{{ result.dates }}</td>
+                            <td>{{ result.description[:100] }}...</td>
+                            <td>{{ result.created_date.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <form method="POST" action="{{ url_for('delete_record', id=result.id, db_type='pubchem') }}" class="d-inline">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>            
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Aba ECHA -->
+        <div class="tab-pane fade" id="echa" role="tabpanel" aria-labelledby="echa-tab">
+            <h4 class="mb-3">ECHA Results</h4>
+            <div class="table-responsive table-container">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">CAS Number</th>
+                            <th scope="col">EC</th>
+                            <th scope="col">Molecular Formula</th>
+                            <th scope="col">Haz Classification</th>
+                            <th scope="col">About 1</th>
+                            <th scope="col">About 2</th>
+                            <th scope="col">Consumer User</th>
+                            <th scope="col">Created Date</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in echa[::-1] %}
+                        <tr>
+                            <td>{{ result.cas_number }}</td>
+                            <td>{{ result.ec }}</td>
+                            <td>{{ result.molecular_formula }}</td>
+                            <td>{{ result.haz_classification[:100] }}...</td>
+                            <td>{{ result.about_1[:100] }}...</td>
+                            <td>{{ result.about_2[:100] }}...</td>
+                            <td>{{ result.consumer_user }}</td>
+                            <td>{{ result.created_date.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <form method="POST" action="{{ url_for('delete_record', id=result.id, db_type='echa') }}" class="d-inline">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>            
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
